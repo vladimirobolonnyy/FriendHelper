@@ -1,4 +1,4 @@
-package ru.obolonnyy.friendhelper.ui.main
+package ru.obolonnyy.friendhelper
 
 import android.arch.lifecycle.ViewModel
 
