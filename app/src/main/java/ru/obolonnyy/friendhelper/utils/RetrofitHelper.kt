@@ -1,6 +1,5 @@
-package ru.obolonnyy.friendhelper
+package ru.obolonnyy.friendhelper.utils
 
-import android.os.Environment
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,17 +7,19 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import ru.obolonnyy.friendhelper.protect.ServerApi
 import ru.obolonnyy.friendhelper.protect.Stand
+import timber.log.Timber
+import java.security.NoSuchAlgorithmException
+import java.security.SecureRandom
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
-import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-object Helper {
+object RetrofitHelper {
 
-    private val client by lazy {
+    private val okHttpClient by lazy {
         OkHttpClient.Builder()
                 .initTls()
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -33,35 +34,34 @@ object Helper {
                 .baseUrl(stand.url)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .client(client)
+                .client(okHttpClient)
                 .build()
                 .create(ServerApi::class.java)
     }
 
-    fun OkHttpClient.Builder.initTls(): OkHttpClient.Builder {
-        val trustManager = newUnsafeTrustManager()
+    private fun OkHttpClient.Builder.initTls(): OkHttpClient.Builder {
+        val trustManager = unsafeTrustManager()
         sslSocketFactory(
-                newAllTrustingSocketFactory(trustManager),
+                allTrustingSocketFactory(trustManager),
                 trustManager
         )
         hostnameVerifier { _, _ -> true }
         return this
     }
 
-    private fun newAllTrustingSocketFactory(trustManager: X509TrustManager): SSLSocketFactory {
-        try {
-            val trustAllCerts = arrayOf<TrustManager>(trustManager)
-            // Install the all-trusting trust manager
+    private fun allTrustingSocketFactory(trustManager: X509TrustManager): SSLSocketFactory {
+        return try {
+            val trustManagers = arrayOf(trustManager)
             val sslContext = SSLContext.getInstance("SSL")
-            sslContext.init(null, trustAllCerts, java.security.SecureRandom())
-            // Create an ssl socket factory with our all-trusting manager
-            return sslContext.socketFactory
-        } catch (e: Throwable) {
-            throw RuntimeException(e)
+            sslContext.init(null, trustManagers, SecureRandom())
+            sslContext.socketFactory
+        } catch (ex: NoSuchAlgorithmException) {
+            Timber.e(ex)
+            throw RuntimeException(ex)
         }
     }
 
-    private fun newUnsafeTrustManager(): X509TrustManager {
+    private fun unsafeTrustManager(): X509TrustManager {
         return object : X509TrustManager {
             @Throws(CertificateException::class)
             override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
@@ -76,8 +76,4 @@ object Helper {
             }
         }
     }
-
-    fun getExturnalStorage() = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-
-
 }

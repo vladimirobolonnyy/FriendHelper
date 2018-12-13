@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FriendHelper</string>
+    <string name="download_apk">Download apk</string>
 </resources>

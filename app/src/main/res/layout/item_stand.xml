@@ -7,23 +7,22 @@
 
     <TextView
         android:id="@+id/name"
-        android:layout_width="70dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:padding="10dp"
+        android:background="?selectableItemBackground"
+        android:padding="16dp"
         android:textColor="@color/dark_blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="ПРОМ" />
+        tools:text="Стенд" />
 
     <TextView
         android:id="@+id/version"
-        android:layout_width="120dp"
+        android:layout_width="128dp"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:background="?selectableItemBackground"
+        android:padding="16dp"
         android:textAlignment="center"
         android:textColor="@color/dark_blue"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -33,26 +32,28 @@
 
     <TextView
         android:id="@+id/status"
-        android:layout_width="60dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:background="?selectableItemBackground"
+        android:padding="16dp"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/version"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="status" />
+        tools:text="Статус" />
 
-    <TextView
+    <ImageView
         android:id="@+id/download"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:visibility="gone"
+        android:background="?selectableItemBackground"
+        android:contentDescription="@string/download_apk"
+        android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/status"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Apk"
-        tools:visibility="visible" />
+        app:srcCompat="@drawable/ic_file_download_black_24dp"
+        tools:text="Apk" />
 
     <me.zhanghai.android.materialprogressbar.MaterialProgressBar
         android:id="@+id/progress_version"
@@ -60,12 +61,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/version"
         app:layout_constraintEnd_toEndOf="@+id/version"
         app:layout_constraintStart_toStartOf="@+id/version"
         app:layout_constraintTop_toTopOf="@+id/version"
-        app:mpb_indeterminateTint="@color/green" />
+        app:mpb_indeterminateTint="@color/dark_blue"
+        tools:visibility="visible" />
 
     <me.zhanghai.android.materialprogressbar.MaterialProgressBar
         android:id="@+id/progress_status"
@@ -73,12 +75,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/status"
         app:layout_constraintEnd_toEndOf="@+id/status"
         app:layout_constraintStart_toStartOf="@+id/status"
         app:layout_constraintTop_toTopOf="@+id/status"
-        app:mpb_indeterminateTint="@color/green" />
+        app:mpb_indeterminateTint="@color/dark_blue"
+        tools:visibility="visible" />
+
+    <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+        android:id="@+id/progress_download"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/download"
+        app:layout_constraintEnd_toEndOf="@+id/download"
+        app:layout_constraintStart_toStartOf="@+id/download"
+        app:layout_constraintTop_toTopOf="@+id/download"
+        app:mpb_indeterminateTint="@color/dark_blue"
+        tools:visibility="visible" />
 
     <View
         android:layout_width="match_parent"

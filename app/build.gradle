@@ -13,6 +13,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+
     }
     buildTypes {
         release {
@@ -51,6 +54,12 @@ dependencies {
     implementation "me.zhanghai.android.materialprogressbar:library:1.4.1"
     implementation 'com.jakewharton.timber:timber:4.7.0'
 
+    implementation "com.android.support:multidex:${versions.multidex}"
+
+    //https://github.com/florent37/KotlinPleaseAnimate
+    //implementation 'com.github.florent37:kotlinpleaseanimate:1.0.2'
+
+    //https://github.com/alexstyl/RadiusTransition
 }
 
 kotlin {

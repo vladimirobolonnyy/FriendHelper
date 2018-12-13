@@ -6,11 +6,9 @@ import android.view.View
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-abstract class ScopedFragment: Fragment(), CoroutineScope {
+abstract class ScopedFragment : Fragment(), CoroutineScope {
     protected lateinit var job: Job
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
@@ -23,13 +21,5 @@ abstract class ScopedFragment: Fragment(), CoroutineScope {
     override fun onDestroyView() {
         job.cancel()
         super.onDestroyView()
-    }
-
-    fun View.disableWithTimeout(timeoutMs: Long = 200) {
-        isEnabled = false
-        launch {
-            delay(timeoutMs)
-            isEnabled = true
-        }
     }
 }

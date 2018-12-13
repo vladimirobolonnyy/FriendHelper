@@ -12,6 +12,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import ru.obolonnyy.friendhelper.protect.ServerApi
 import ru.obolonnyy.friendhelper.protect.Stand
+import ru.obolonnyy.friendhelper.utils.RetrofitHelper
+import ru.obolonnyy.friendhelper.utils.getAvailableDownloadsDir
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -23,24 +25,22 @@ class MainFragment : ScopedFragment() {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var recycler: RecyclerView
-    private lateinit var swiper: SwipeRefreshLayout
+    private lateinit var swipe: SwipeRefreshLayout
     private val elements = Stand.values()
     private val apis by lazy { initApis() }
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return inflater.inflate(R.layout.main_fragment, container, false)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel.apis = apis
+        viewModel.filesDir = context!!.getAvailableDownloadsDir()
         initViews(view)
     }
 
@@ -48,22 +48,22 @@ class MainFragment : ScopedFragment() {
         recycler = view.findViewById(R.id.recycler)
         recycler.layoutManager = LinearLayoutManager(this.context)
         recycler.adapter = createAdapter()
-        swiper = view.findViewById(R.id.swiper)
-        swiper.setOnRefreshListener { refreshItems() }
+        swipe = view.findViewById(R.id.swiper)
+        swipe.setOnRefreshListener { refreshItems() }
     }
 
     private fun initApis(): Map<Stand, ServerApi> {
         return hashMapOf<Stand, ServerApi>().apply {
             elements.forEach {
-                this[it] = Helper.createRetrofit(it)
+                this[it] = RetrofitHelper.createRetrofit(it)
             }
         }
     }
 
     private fun refreshItems() {
         recycler.adapter = createAdapter()
-        swiper.isRefreshing = false
+        swipe.isRefreshing = false
     }
 
-    private fun createAdapter() = SimpleAdapter(elements, this.context!!, apis, coroutineContext)
+    private fun createAdapter() = MainAdapter(elements, this.context!!, coroutineContext, viewModel)
 }
