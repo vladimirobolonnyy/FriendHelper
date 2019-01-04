@@ -13,6 +13,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import ru.obolonnyy.friendhelper.protect.ServerApi
 import ru.obolonnyy.friendhelper.protect.Stand
 import ru.obolonnyy.friendhelper.utils.RetrofitHelper
+import ru.obolonnyy.friendhelper.utils.StandI
 import ru.obolonnyy.friendhelper.utils.getAvailableDownloadsDir
 
 @ObsoleteCoroutinesApi
@@ -26,7 +27,7 @@ class MainFragment : ScopedFragment() {
     private lateinit var viewModel: MainViewModel
     private lateinit var recycler: RecyclerView
     private lateinit var swipe: SwipeRefreshLayout
-    private val elements = Stand.values()
+    private val elements = Stand.values() as Array<StandI>
     private val apis by lazy { initApis() }
 
     override fun onCreateView(
@@ -52,8 +53,8 @@ class MainFragment : ScopedFragment() {
         swipe.setOnRefreshListener { refreshItems() }
     }
 
-    private fun initApis(): Map<Stand, ServerApi> {
-        return hashMapOf<Stand, ServerApi>().apply {
+    private fun initApis(): Map<StandI, ServerApi> {
+        return hashMapOf<StandI, ServerApi>().apply {
             elements.forEach {
                 this[it] = RetrofitHelper.createRetrofit(it)
             }

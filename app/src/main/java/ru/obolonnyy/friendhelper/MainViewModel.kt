@@ -8,27 +8,23 @@ import retrofit2.HttpException
 import retrofit2.Response
 import ru.obolonnyy.friendhelper.protect.ServerApi
 import ru.obolonnyy.friendhelper.protect.Stand
-import ru.obolonnyy.friendhelper.utils.BaseBean1
+import ru.obolonnyy.friendhelper.utils.*
 import ru.obolonnyy.friendhelper.utils.Constants.DATA_POWER_ERROR
 import ru.obolonnyy.friendhelper.utils.Constants.ERROR
 import ru.obolonnyy.friendhelper.utils.Constants.ONLINE
 import ru.obolonnyy.friendhelper.utils.Constants.SUCCESS
 import ru.obolonnyy.friendhelper.utils.Constants.UNKNOWN_ERROR
-import ru.obolonnyy.friendhelper.utils.MyResult
-import ru.obolonnyy.friendhelper.utils.parseAsAuthService
-import ru.obolonnyy.friendhelper.utils.toLocal
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
-import java.io.InterruptedIOException
 
 class MainViewModel : ViewModel() {
 
-    lateinit var apis: Map<Stand, ServerApi>
+    lateinit var apis: Map<StandI, ServerApi>
     lateinit var filesDir: File
-    private val versions = HashMap<String, String>()
+    private val getJustApkFileName = "friend.apk"
 
-    suspend fun getStandVersion(stand: Stand): String {
+    suspend fun getStandVersion(stand: StandI): String {
         val result = getVersion(stand)
         return when (result) {
             is MyResult.Success -> result.data
@@ -36,10 +32,9 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private suspend fun getVersion(stand: Stand): MyResult<String> {
+    private suspend fun getVersion(stand: StandI): MyResult<String> {
         return try {
             val response = apis[stand]!!.getVersion().await()
-            versions[stand.engName] = response.toLocal().version
             MyResult.Success(response.toLocal().version)
         } catch (ex: Exception) {
             Timber.e(ex)
@@ -47,15 +42,15 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    suspend fun standAvailable(stand: Stand): String {
+    suspend fun standAvailable(stand: StandI): TextColor {
         val result = getStand(stand)
         return when (result) {
-            is MyResult.Success -> ONLINE
-            is MyResult.Error -> result.message
+            is MyResult.Success -> TextColor(ONLINE, "GREEN")
+            is MyResult.Error -> TextColor(result.message, "RED")
         }
     }
 
-    private suspend fun getStand(stand: Stand): MyResult<String> {
+    private suspend fun getStand(stand: StandI): MyResult<String> {
         //ToDo вот с этим что-то надо сделать
         return try {
             when (stand) {
@@ -83,18 +78,18 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    suspend fun downloadApk(stand: Stand): String {
-        val result = downloadApkFromStand(stand)
+    suspend fun downloadApk(stand: StandI, remoteVersion: String): String {
+        val result = downloadApkFromStand(stand, remoteVersion)
         return when (result) {
             is MyResult.Success -> result.data
             is MyResult.Error -> result.message
         }
     }
 
-    private suspend fun downloadApkFromStand(stand: Stand): MyResult<String> {
+    private suspend fun downloadApkFromStand(stand: StandI, remoteVersion: String): MyResult<String> {
         return try {
             val response = apis[stand]!!.downloadApk().await()
-            saveApkToFile(response, getApkFileName(stand))
+            saveApkToFile(response, stand, remoteVersion)
             MyResult.Success(SUCCESS)
         } catch (ex: Exception) {
             Timber.e(ex)
@@ -102,38 +97,41 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun saveApkToFile(response: Response<ResponseBody>, fileName: String) {
+    private fun saveApkToFile(response: Response<ResponseBody>, stand: StandI, remoteVersion: String) {
+        val filePath = getApkPathFile(stand, remoteVersion)
         var sink: BufferedSink? = null
         try {
-            if (!filesDir.exists()) {
-                filesDir.mkdir()
+            if (!filePath.exists()) {
+                filePath.mkdirs()
             }
-            val file = File(filesDir.toString() + fileName)
-            if (!file.exists()) {
-                file.mkdir()
-            }
+            val file = File(filePath.toString() + "/" + getJustApkFileName)
+            file.createNewFile()
             sink = Okio.buffer(Okio.sink(file))
-            sink!!.writeAll(response.body()!!.source())
-        } catch (e: Exception) {
+            sink.writeAll(response.body()!!.source())
+        } catch (ex: Exception) {
+            Timber.e(ex, "sink writing error")
         } finally {
             try {
                 sink?.close()
-            } catch (e: IOException) {
-                if (e !is InterruptedIOException) {
-                    Timber.e(e, "sink closing error")
-                }
+            } catch (ex: IOException) {
+                Timber.e(ex, "sink closing error")
             }
-
         }
     }
 
-    fun getApkFile(stand: Stand): File {
-        return File(filesDir.toString() + getApkFileName(stand))
+    private fun getApkPathFile(elem: StandI, version: String): File {
+        return File(filesDir.toString() + getApkPath(elem, version) + "/")
     }
 
-    fun getApkFileName(stand: Stand): String {
-        //ToDo add version
-        val version = versions[stand.engName]
-        return "/${stand.engName}/$version/friend.apk"
+    fun getApkFile(elem: StandI, version: String): File {
+        return File(filesDir.toString() + getApkPath(elem, version) + getJustApkFileName)
+    }
+
+    fun fileExists(elem: StandI, version: String): Boolean {
+        return getApkFile(elem, version).exists()
+    }
+
+    private fun getApkPath(elem: StandI, version: String): String {
+        return "/friend/${elem.engName}/$version/"
     }
 }

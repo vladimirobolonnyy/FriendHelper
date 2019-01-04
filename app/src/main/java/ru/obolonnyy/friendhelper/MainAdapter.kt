@@ -11,12 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
-import android.widget.Toast
 import kotlinx.coroutines.*
-import ru.obolonnyy.friendhelper.protect.Stand
+import ru.obolonnyy.friendhelper.BuildConfig.APPLICATION_ID
 import ru.obolonnyy.friendhelper.utils.Constants
 import ru.obolonnyy.friendhelper.utils.Constants.ERROR
 import ru.obolonnyy.friendhelper.utils.Constants.SUCCESS
+import ru.obolonnyy.friendhelper.utils.StandI
 import ru.obolonnyy.friendhelper.utils.getColorCompat
 import kotlin.coroutines.CoroutineContext
 
@@ -24,7 +24,7 @@ import kotlin.coroutines.CoroutineContext
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MainAdapter(
-    private val elements: Array<Stand>,
+    private val elements: Array<StandI>,
     private val context: Context,
     override val coroutineContext: CoroutineContext,
     private val viewModel: MainViewModel
@@ -47,7 +47,7 @@ class MainAdapter(
         bindViewHolder(holder, elements[position])
     }
 
-    private fun bindViewHolder(holder: MainViewHolder, elem: Stand) = with(holder) {
+    private fun bindViewHolder(holder: MainViewHolder, elem: StandI) = with(holder) {
         name.text = elem.stringName
         name.setOnClickListener { goToKiosk(elem) }
 
@@ -57,57 +57,63 @@ class MainAdapter(
         status.setOnClickListener { standAvailable(holder, elem) }
         standAvailable(holder, elem)
 
-        ///ToDo чекать локальный файл
         download_progress.visibility = View.GONE
-        if (viewModel.getApkFile(elem).exists()) {
-            download.setImageResource(R.drawable.ic_check_black_24dp)
-            download.setOnClickListener { openFolder(elem) }
-        } else {
-            download.setOnClickListener { downloadApk(holder, elem) }
-        }
+        download.visibility = View.GONE
     }
 
-    private fun getStandVersion(holder: MainViewHolder, elem: Stand) = launch(Dispatchers.Main) {
+    private fun getStandVersion(holder: MainViewHolder, elem: StandI) = launch(Dispatchers.Main) {
         with(holder) {
             version.text = ""
             version_progress.visibility = View.VISIBLE
 
-            version.text = viewModel.getStandVersion(elem)
+            val remoteVersion = viewModel.getStandVersion(elem)
+            version.text = remoteVersion
             version_progress.visibility = View.GONE
+
+            initDownloading(holder, elem, remoteVersion)
         }
     }
 
-    private fun standAvailable(holder: MainViewHolder, elem: Stand) = launch(Dispatchers.Main) {
+    private fun initDownloading(holder: MainViewHolder, elem: StandI, remoteVersion: String) {
+        with (holder){
+            download_progress.visibility = View.GONE
+            download.visibility = View.VISIBLE
+
+            if (viewModel.fileExists(elem, remoteVersion)){
+                download.setImageResource(R.drawable.ic_check_black_24dp)
+                download.setOnClickListener { openFolder(elem, remoteVersion) }
+            } else {
+                download.setOnClickListener { downloadApk(holder, elem, remoteVersion) }
+            }
+        }
+    }
+
+    private fun standAvailable(holder: MainViewHolder, elem: StandI) = launch(Dispatchers.Main) {
         with(holder) {
             status.text = ""
             status_progress.visibility = View.VISIBLE
 
             val result = viewModel.standAvailable(elem)
-            status.text = result
+            status.text = result.text
             status_progress.visibility = View.GONE
-            //ToDo rework
-            if (result == Constants.ONLINE) {
-                status.setTextColor(green)
-            } else {
-                status.setTextColor(red)
+            when (result.color) {
+                Constants.GREEN -> status.setTextColor(green)
+                Constants.RED -> status.setTextColor(red)
+                else -> status.setTextColor(red)
             }
         }
     }
 
-    private fun downloadApk(holder: MainViewHolder, stand: Stand) = launch(Dispatchers.Main) {
+    private fun downloadApk(holder: MainViewHolder, stand: StandI, remoteVersion: String) = launch(Dispatchers.Main) {
         with(holder) {
             download_progress.visibility = View.VISIBLE
             download.visibility = View.INVISIBLE
 
-            val result = if (viewModel.getApkFile(stand).exists()) {
-                SUCCESS
-            } else {
-                viewModel.downloadApk(stand)
-            }
+            val result = viewModel.downloadApk(stand, remoteVersion)
             when (result) {
                 SUCCESS -> {
                     download.setImageResource(R.drawable.ic_check_black_24dp)
-                    download.setOnClickListener { openFolder(stand) }
+                    download.setOnClickListener { openFolder(stand, remoteVersion) }
                 }
                 ERROR -> download.setImageResource(R.drawable.ic_error_outline_black_24dp)
             }
@@ -116,29 +122,13 @@ class MainAdapter(
         }
     }
 
-    //ToDo remove?
-    private fun toast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun goToKiosk(stand: Stand) {
+    private fun goToKiosk(stand: StandI) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(stand.url))
         startActivity(context, browserIntent, null)
     }
 
-    private fun openFolder2(stand: Stand) {
-        val file = viewModel.getApkFile(stand)
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
-        )
-//        intent.setDataAndType(Uri.fromFile(file), "*/*")
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(context, intent, null)
-    }
-
-    private fun openFolder(stand: Stand) {
-        val file = viewModel.getApkFile(stand)
+    private fun openFolder(stand: StandI, remoteVersion: String) {
+        val file = viewModel.getApkFile(stand, remoteVersion)
 
         val mime = MimeTypeMap.getSingleton()
         val ext = file.name.substring(file.name.lastIndexOf(".") + 1)
@@ -147,7 +137,7 @@ class MainAdapter(
         intent.action = Intent.ACTION_VIEW
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            val contentUri = FileProvider.getUriForFile(context, "ru.obolonnyy.friendhelper.provider", file)
+            val contentUri = FileProvider.getUriForFile(context, "$APPLICATION_ID.provider", file)
             intent.setDataAndType(contentUri, type)
         } else {
             intent.setDataAndType(Uri.fromFile(file), type)

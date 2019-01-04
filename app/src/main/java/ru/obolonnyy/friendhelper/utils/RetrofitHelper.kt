@@ -29,7 +29,7 @@ object RetrofitHelper {
                 .build()
     }
 
-    fun createRetrofit(stand: Stand): ServerApi {
+    fun createRetrofit(stand: StandI): ServerApi {
         return Retrofit.Builder()
                 .baseUrl(stand.url)
                 .addConverterFactory(MoshiConverterFactory.create())
