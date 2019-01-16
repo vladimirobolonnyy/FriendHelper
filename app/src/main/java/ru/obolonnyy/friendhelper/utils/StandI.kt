@@ -5,3 +5,5 @@ interface StandI {
     val url: String
     val engName: String
 }
+
+data class StandC(override val stringName: String, override val url: String, override val engName: String) : StandI

@@ -7,13 +7,19 @@ import okio.Okio
 import retrofit2.HttpException
 import retrofit2.Response
 import ru.obolonnyy.friendhelper.protect.ServerApi
-import ru.obolonnyy.friendhelper.protect.Stand
-import ru.obolonnyy.friendhelper.utils.*
+import ru.obolonnyy.friendhelper.utils.AuthServerError
 import ru.obolonnyy.friendhelper.utils.Constants.DATA_POWER_ERROR
 import ru.obolonnyy.friendhelper.utils.Constants.ERROR
+import ru.obolonnyy.friendhelper.utils.Constants.NOT_HTTP_ERROR
 import ru.obolonnyy.friendhelper.utils.Constants.ONLINE
 import ru.obolonnyy.friendhelper.utils.Constants.SUCCESS
 import ru.obolonnyy.friendhelper.utils.Constants.UNKNOWN_ERROR
+import ru.obolonnyy.friendhelper.utils.MyResult
+import ru.obolonnyy.friendhelper.utils.StandI
+import ru.obolonnyy.friendhelper.utils.TextColor
+import ru.obolonnyy.friendhelper.utils.parseAuthService
+import ru.obolonnyy.friendhelper.utils.parseOldAuthService
+import ru.obolonnyy.friendhelper.utils.toLocal
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -34,7 +40,11 @@ class MainViewModel : ViewModel() {
 
     private suspend fun getVersion(stand: StandI): MyResult<String> {
         return try {
-            val response = apis[stand]!!.getVersion().await()
+            val response = if (stand.engName.contains("IOs")) {
+                apis[stand]!!.getVersionIOs().await()
+            } else {
+                apis[stand]!!.getVersion().await()
+            }
             MyResult.Success(response.toLocal().version)
         } catch (ex: Exception) {
             Timber.e(ex)
@@ -53,27 +63,34 @@ class MainViewModel : ViewModel() {
     private suspend fun getStand(stand: StandI): MyResult<String> {
         //ToDo вот с этим что-то надо сделать
         return try {
+
             when (stand) {
-                Stand.DEV -> apis[stand]!!.authDev(BaseBean1()).await()
-                else -> apis[stand]!!.auth(BaseBean1()).await()
+//                Stand.DEV -> apis[stand]!!.authDev(BaseBean1()).await()
+                else -> apis[stand]!!.sendEmailTemporaryCode().await()
             }
+
             MyResult.Success(ONLINE)
         } catch (ex: Exception) {
             Timber.e(ex)
             when (ex) {
                 is HttpException -> {
-                    val error = ex.parseAsAuthService()
-                    if (error?.exceptionClass?.endsWith("AuthException") == true)
+                    val error = ex.parseAuthService()
+                    if (error?.kind == AuthServerError.ERROR_ID_NOTFOUND){
+                        return MyResult.Success(ONLINE)
+                    }
+                    //ToDo remove? or try to catch datapower?
+                    val errorOld = ex.parseOldAuthService()
+                    if (errorOld?.exceptionClass?.endsWith("AuthException") == true)
                         MyResult.Success(ONLINE)
                     else {
-                        if (error?.errmsg?.contains("power") == true) {
+                        if (errorOld?.errmsg?.contains("power") == true) {
                             MyResult.Error(ex, DATA_POWER_ERROR)
                         } else {
                             MyResult.Error(ex, UNKNOWN_ERROR)
                         }
                     }
                 }
-                else -> MyResult.Error(ex, UNKNOWN_ERROR)
+                else -> MyResult.Error(ex, NOT_HTTP_ERROR)
             }
         }
     }

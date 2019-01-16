@@ -11,7 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.launch
 import ru.obolonnyy.friendhelper.BuildConfig.APPLICATION_ID
 import ru.obolonnyy.friendhelper.utils.Constants
 import ru.obolonnyy.friendhelper.utils.Constants.ERROR
@@ -24,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MainAdapter(
-    private val elements: Array<StandI>,
+    private val elements: List<StandI>,
     private val context: Context,
     override val coroutineContext: CoroutineContext,
     private val viewModel: MainViewModel
