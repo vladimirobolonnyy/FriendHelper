@@ -3,31 +3,42 @@ package ru.obolonnyy.friendhelper
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import org.koin.android.ext.android.inject
+import ru.obolonnyy.friendhelper.main.main.MainFragment
 import timber.log.Timber
+
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
+    private val tree: DataBaseLoggingTree by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(tree)
+        }
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, MainFragment.newInstance())
-                .commitNow()
+            startMainFragment()
         }
         askPermissions()
     }
 
-    fun askPermissions(): Boolean {
+    private fun startMainFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, MainFragment.newInstance())
+            .commitNow()
+    }
+
+    private fun askPermissions(): Boolean {
         // Here, thisActivity is the current activity
         return if (ContextCompat.checkSelfPermission(
                 this,

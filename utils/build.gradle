@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+dependencies {
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"

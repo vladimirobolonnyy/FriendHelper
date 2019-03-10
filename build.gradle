@@ -1,14 +1,17 @@
 apply from: 'deps.gradle'
+apply plugin: 'com.gradle.build-scan'
 
 buildscript {
     apply from: 'deps.gradle'
     repositories {
         google()
         jcenter()
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
+        classpath 'com.gradle:build-scan-plugin:1.16'
     }
 }
 
@@ -16,9 +19,16 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url 'https://jitpack.io' }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
 }
