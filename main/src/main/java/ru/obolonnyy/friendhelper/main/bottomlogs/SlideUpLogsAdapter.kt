@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.obolonnyy.friendhelper.main.R
 
-class SlideUpLogsAdapter(var elements: List<String?>) : RecyclerView.Adapter<SlideUpLogsViewHolder>() {
+class SlideUpLogsAdapter(val elements: MutableList<String>) : RecyclerView.Adapter<SlideUpLogsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SlideUpLogsViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_simple_text, parent, false)
@@ -18,8 +18,9 @@ class SlideUpLogsAdapter(var elements: List<String?>) : RecyclerView.Adapter<Sli
         holder.text.text = elements[position]
     }
 
-    fun updateElements(newList: List<String?>) {
-        this.elements = newList.map { it ?: "" }
+    fun updateElements(newList: List<String>) {
+        this.elements.clear()
+        this.elements.addAll(newList)
         notifyDataSetChanged()
     }
 }

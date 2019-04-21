@@ -1,9 +1,14 @@
 package ru.obolonnyy.friendhelper.main.main
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
@@ -11,12 +16,14 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utilsandroid.ScopedFragment
+import java.io.File
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MainFragment : ScopedFragment() {
 
     val viewModel: MainViewModel by inject()
+    val provider: String by inject("provider")
 
     private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var adapter: MainAdapter
@@ -54,6 +61,13 @@ class MainFragment : ScopedFragment() {
         adapter.updateItems(items)
     }
 
+    private fun render(state: MainViewState) {
+        with(state) {
+            items?.let { adapter.updateItems(it) }
+            file?.let { openFolder(it) }
+        }
+    }
+
     private fun refreshItems() {
         swipe.isRefreshing = false
         viewModel.refresh()
@@ -65,6 +79,22 @@ class MainFragment : ScopedFragment() {
         onStatusClicked = viewModel::onStatusClicked,
         onFileClicked = viewModel::onFileClicked
     )
+
+    private fun openFolder(file: File) {
+        val mime = MimeTypeMap.getSingleton()
+        val ext = file.name.substring(file.name.lastIndexOf(".") + 1)
+        val type = mime.getMimeTypeFromExtension(ext)
+        val intent = Intent()
+        intent.action = Intent.ACTION_VIEW
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            val contentUri = FileProvider.getUriForFile(context!!, provider, file)
+            intent.setDataAndType(contentUri, type)
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), type)
+        }
+        startActivity(intent)
+    }
 
     companion object {
         fun newInstance() = MainFragment()

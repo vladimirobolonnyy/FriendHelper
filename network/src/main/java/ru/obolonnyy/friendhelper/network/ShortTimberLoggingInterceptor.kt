@@ -18,17 +18,23 @@ class ShortTimberLoggingInterceptor : Interceptor {
         Timber.v("REQUEST BODY BEGIN\n%s\nREQUEST BODY END", bodyToString(request))
 
         val response = chain.proceed(request)
-        val responseBody = response.body()
-        val responseBodyString = response.body()!!.string()
 
-        Timber.v("RESPONSE BODY BEGIN:\n%s\nRESPONSE BODY END", responseBodyString)
+        if (request.url().url().toString().contains("/file")) {
+            //Against big files
+            return response
+        }
+
+        val responseBody = response.body()
+        val oldBody = response.body()!!.string()
+
+        Timber.v("RESPONSE BODY BEGIN:\n%s\nRESPONSE BODY END", oldBody)
 
         // now we have extracted the response body but in the process
         // we have consumed the original reponse and can't read it again
         // so we need to build a new one to return from this method
 
         return response.newBuilder()
-            .body(ResponseBody.create(responseBody!!.contentType(), responseBodyString.toByteArray())).build()
+            .body(ResponseBody.create(responseBody!!.contentType(), oldBody.toByteArray())).build()
     }
 
     private fun bodyToString(request: Request): String {

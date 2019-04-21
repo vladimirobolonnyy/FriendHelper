@@ -33,7 +33,7 @@ class SlideUpLogsView : ScopedFrameLayout, KoinComponent {
         launch { model.text.consumeEach(::renderMessages) }
     }
 
-    private fun renderMessages(text: List<String?>) {
+    private fun renderMessages(text: List<String>) {
         adapter.updateElements(text)
     }
 

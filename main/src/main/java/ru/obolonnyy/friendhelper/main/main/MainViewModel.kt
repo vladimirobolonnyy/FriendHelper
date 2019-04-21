@@ -1,8 +1,13 @@
 package ru.obolonnyy.friendhelper.main.main
 
 import android.view.View
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.launch
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.local.StandI
@@ -18,10 +23,8 @@ class MainViewModel(
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
 
-    val viewChannel = ConflatedBroadcastChannel<List<StandState>>()
-    private var viewState = emptyList<StandState>()
-
-    private val getJustApkFileName = "friend.apk"
+    val viewChannel = ConflatedBroadcastChannel<MainViewState>()
+    private var viewState = MainViewState()
 
     init {
         val elementsState = mutableListOf<StandState>()
@@ -29,26 +32,39 @@ class MainViewModel(
             val state = StandState(index, standI)
             elementsState.add(state)
         }
-        viewState = elementsState
+        viewState = MainViewState(items = elementsState)
         viewChannel.offer(viewState)
+        refresh()
     }
 
     fun refresh() {
-
+        viewState.items?.forEach {
+            onVersionClicked(it)
+            onStatusClicked(it)
+        }
     }
 
     fun onVersionClicked(state: StandState) {
         launch {
             val pos = state.position
-            viewState[pos].versionProgressVisibility = View.VISIBLE
-            viewState[pos].version = ""
+            viewState.file = null
+            viewState.items?.get(pos)!!.versionProgressVisibility = View.VISIBLE
+            viewState.items?.get(pos)!!.version = ""
             viewChannel.offer(viewState)
             val result = mainModel.getStandVersion(state.standI)
             when (result) {
-                is MyResult.Success -> viewState[pos].version = result.data
-                is MyResult.Error -> viewState[pos].version = result.message
+                is MyResult.Success -> {
+                    viewState.items?.get(pos)!!.version = result.data
+                    if (viewState.items?.get(pos)!!.fileStatus != FileStatus.LOADING) {
+                        viewState.items?.get(pos)!!.fileVisibility = View.VISIBLE
+                    }
+                }
+                is MyResult.Error -> viewState.items?.get(pos)!!.version = result.message
             }
-            viewState[pos].versionProgressVisibility = View.GONE
+            viewState.items?.get(pos)!!.versionProgressVisibility = View.GONE
+            if (mainModel.fileExists(state)) {
+                state.changeFileState(FileStatus.LOADED)
+            }
             viewChannel.offer(viewState)
         }
     }
@@ -56,96 +72,50 @@ class MainViewModel(
     fun onStatusClicked(state: StandState) {
         launch {
             val pos = state.position
-            viewState[pos].statusProgressVisibility = View.VISIBLE
-            viewState[pos].status = ""
+            viewState.file = null
+            viewState.items?.get(pos)!!.statusProgressVisibility = View.VISIBLE
+            viewState.items?.get(pos)!!.status = ""
             viewChannel.offer(viewState)
             val result = mainModel.getStandStatus(state.standI)
             when (result) {
                 is MyResult.Success -> {
-                    viewState[pos].status = result.data
-                    viewState[pos].statusColor = R.color.green
+                    viewState.items?.get(pos)!!.status = result.data
+                    viewState.items?.get(pos)!!.statusColor = R.color.green
                 }
                 is MyResult.Error -> {
-                    viewState[pos].status = result.message
-                    viewState[pos].statusColor = R.color.red
+                    viewState.items?.get(pos)!!.status = result.message
+                    viewState.items?.get(pos)!!.statusColor = R.color.red
                 }
             }
-            viewState[pos].statusProgressVisibility = View.GONE
+            viewState.items?.get(pos)!!.statusProgressVisibility = View.GONE
             viewChannel.offer(viewState)
         }
     }
 
     fun onFileClicked(state: StandState) {
-//        launch {
-//            val pos = state.position
-////            viewState[pos].versionProgressVisibility = View.VISIBLE
-////            viewState[pos].version = ""
-//            viewChannel.offer(viewState)
-//            val result = mainModel.getStandVersion(state.standI)
-//            when (result) {
-//                is MyResult.Success -> viewState[pos].version = result.data
-//                is MyResult.Error -> viewState[pos].version = result.message
-//            }
-////            viewState[pos].versionProgressVisibility = View.GONE
-////            viewChannel.offer(viewState)
-//        }
+        when (state.fileStatus) {
+            FileStatus.NOT_LOADED -> downloadFile(state)
+            FileStatus.LOADING -> { /* no need to do anything*/
+            }
+            FileStatus.LOADED -> {
+                viewState = viewState.copy(file = mainModel.getApkFile(state))
+                viewChannel.offer(viewState)
+            }
+            FileStatus.ERROR -> downloadFile(state)
+        }
     }
-//
-//
-//    suspend fun downloadApk(stand: StandI, remoteVersion: String): String {
-//        val result = downloadApkFromStand(stand, remoteVersion)
-//        return when (result) {
-//            is MyResult.Success -> result.data
-//            is MyResult.Error -> result.message
-//        }
-//    }
-//
-//    private suspend fun downloadApkFromStand(stand: StandI, remoteVersion: String): MyResult<String> {
-//        return try {
-//            val response = interactor.downloadApk(stand).await()
-//            saveApkToFile(response, stand, remoteVersion)
-//            MyResult.Success(SUCCESS)
-//        } catch (ex: Exception) {
-//            Timber.e(ex)
-//            MyResult.Error(ex, ERROR)
-//        }
-//    }
-//
-//    private fun saveApkToFile(response: Response<ResponseBody>, stand: StandI, remoteVersion: String) {
-//        val filePath = getApkPathFile(stand, remoteVersion)
-//        var sink: BufferedSink? = null
-//        try {
-//            if (!filePath.exists()) {
-//                filePath.mkdirs()
-//            }
-//            val file = File("$filePath/$getJustApkFileName")
-//            file.createNewFile()
-//            sink = Okio.buffer(Okio.sink(file))
-//            sink.writeAll(response.body()!!.source())
-//        } catch (ex: Exception) {
-//            Timber.e(ex, "sink writing error")
-//        } finally {
-//            try {
-//                sink?.close()
-//            } catch (ex: IOException) {
-//                Timber.e(ex, "sink closing error")
-//            }
-//        }
-//    }
-//
-//    private fun getApkPathFile(elem: StandI, version: String): File {
-//        return File(filesDir.toString() + getApkPath(elem, version) + "/")
-//    }
-//
-//    fun getApkFile(elem: StandI, version: String): File {
-//        return File(filesDir.toString() + getApkPath(elem, version) + getJustApkFileName)
-//    }
-//
-//    fun fileExists(elem: StandI, version: String): Boolean {
-//        return getApkFile(elem, version).exists()
-//    }
-//
-//    private fun getApkPath(elem: StandI, version: String): String {
-//        return "/friend/${elem.engName}/$version/"
-//    }
+
+    private fun downloadFile(state: StandState) {
+        GlobalScope.launch (Dispatchers.IO) {
+            val pos = state.position
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING)
+            viewChannel.offer(viewState)
+            val result = mainModel.downloadFile(state)
+            when (result) {
+                is MyResult.Success -> viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADED)
+                is MyResult.Error -> viewState.items?.get(pos)!!.changeFileState(FileStatus.ERROR)
+            }
+            viewChannel.offer(viewState)
+        }
+    }
 }

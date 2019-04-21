@@ -19,8 +19,11 @@ import ru.obolonnyy.friendhelper.utils.local.StandI
 import ru.obolonnyy.friendhelper.utilsandroid.getAvailableDownloadsDir
 import java.io.File
 
-val mainModule = module {
+val appModule = module {
+    single("provider") { "${BuildConfig.APPLICATION_ID}.provider" }
+}
 
+val mainModule = module {
     single<List<StandI>> { initElements() }
     single<File> { androidContext().getAvailableDownloadsDir() }
     single { MainModel(interactor = get(), filesDir = get()) }
@@ -28,12 +31,10 @@ val mainModule = module {
 }
 
 val networkModule = module {
-
     single<ApiInteractorInterface> { ApiInteractor() }
 }
 
 val roomModule = module {
-
     single<MainDataBase<MainElementInt>> { MyDataBase(androidContext()) }
     single<BaseDataBaseOperations<StringElementInt>> { StringDataBase(androidContext()).logsHistory() }
     single { SecondViewModel(db = get()) }
@@ -41,6 +42,6 @@ val roomModule = module {
     single { LogsViewModel() }
 }
 
-val koinModules = listOf(mainModule, networkModule, roomModule)
+val koinModules = listOf(appModule, mainModule, networkModule, roomModule)
 
 private const val DATABASE_NAME = "main_db"

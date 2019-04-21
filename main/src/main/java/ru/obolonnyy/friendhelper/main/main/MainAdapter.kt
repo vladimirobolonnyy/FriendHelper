@@ -1,6 +1,7 @@
 package ru.obolonnyy.friendhelper.main.main
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
@@ -32,16 +33,19 @@ class MainAdapter(
 
         version.text = elem.version
         version.setOnClickListener { onVersionClicked(elem) }
+        version.isClickable = elem.versionProgressVisibility == View.GONE
         versionProgress.visibility = elem.versionProgressVisibility
 
         status.text = elem.status
         status.setTextColor(holder.itemView.context.getColorCompat(elem.statusColor))
         status.setOnClickListener { onStatusClicked(elem) }
+        status.isClickable = elem.statusProgressVisibility == View.GONE
         statusProgress.visibility = elem.statusProgressVisibility
 
         file.visibility = elem.fileVisibility
         file.setImageResource(elem.fileImageResource)
         file.setOnClickListener { onFileClicked(elem) }
+        file.isClickable = elem.fileProgressVisibility == View.GONE
         fileProgress.visibility = elem.fileProgressVisibility
     }
 

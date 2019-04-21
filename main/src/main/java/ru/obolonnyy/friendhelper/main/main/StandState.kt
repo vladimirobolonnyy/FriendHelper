@@ -26,7 +26,7 @@ data class StandState(
     var fileVisibility: Int = View.GONE
 ) {
 
-    private var fileStatus: FileStatus = FileStatus.NOT_LOADED
+    var fileStatus: FileStatus = FileStatus.NOT_LOADED
 
     fun changeFileState(status: FileStatus) {
         fileStatus = status
@@ -37,7 +37,7 @@ data class StandState(
                 fileProgressVisibility = View.GONE
             }
             FileStatus.LOADING -> {
-                fileVisibility = View.GONE
+                fileVisibility = View.INVISIBLE
                 fileProgressVisibility = View.VISIBLE
             }
             FileStatus.LOADED -> {

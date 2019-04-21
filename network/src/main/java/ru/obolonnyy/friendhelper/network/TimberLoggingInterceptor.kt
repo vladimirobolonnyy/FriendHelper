@@ -19,7 +19,10 @@ class TimberLoggingInterceptor : Interceptor {
         Timber.v("REQUEST BODY BEGIN\n%s\nREQUEST BODY END", bodyToString(request))
 
         val response = chain.proceed(request)
-
+        if (request.url().url().toString().contains("/file")) {
+            //Against big files
+            return response
+        }
         val responseBody = response.body()
         val responseBodyString = response.body()!!.string()
 
@@ -37,7 +40,7 @@ class TimberLoggingInterceptor : Interceptor {
             (t2 - t1) / 1e6,
             response.headers()
         )
-        Timber.v("RESPONSE BODY BEGIN:\n%s\nRESPONSE BODY END", responseBodyString)
+//        Timber.v("RESPONSE BODY BEGIN:\n%s\nRESPONSE BODY END", responseBodyString)
 
         return newResponse
     }
