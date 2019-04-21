@@ -10,6 +10,7 @@ dependencies {
 
     implementation project(":api")
     implementation project(":utils")
+    implementation project(":ServerApi") // git clone --recursive https://github.com/vladimirobolonnyy/ServerApi
 
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 

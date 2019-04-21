@@ -2,6 +2,7 @@ package ru.obolonnyy.friendhelper.network
 
 import ru.obolonnyy.friendhelper.utils.local.StandC
 import ru.obolonnyy.friendhelper.utils.local.StandI
+import ru.obolonnyy.priv.network.Stand
 
 object ElementsGenerator {
     fun initElements(): List<StandI> {

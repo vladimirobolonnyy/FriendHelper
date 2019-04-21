@@ -1,6 +1,6 @@
 package ru.obolonnyy.friendhelper.utils.data
 
-data class emailAttrDto(
+data class EmailAttrDto(
     val email: String = "email@email",
     val instanceId: String = "111111",
     val device: Any = Device()

@@ -7,6 +7,7 @@ import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
 import ru.obolonnyy.friendhelper.network.RetrofitHelper.createRetrofits
 import ru.obolonnyy.friendhelper.utils.local.StandI
 import ru.obolonnyy.friendhelper.utils.local.VersionDto
+import ru.obolonnyy.priv.network.ServerApi
 
 class ApiInteractor : ApiInteractorInterface {
 

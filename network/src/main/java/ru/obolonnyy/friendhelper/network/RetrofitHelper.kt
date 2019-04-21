@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import ru.obolonnyy.friendhelper.network.ElementsGenerator.initElements
 import ru.obolonnyy.friendhelper.utils.local.StandI
+import ru.obolonnyy.priv.network.ServerApi
 import timber.log.Timber
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
