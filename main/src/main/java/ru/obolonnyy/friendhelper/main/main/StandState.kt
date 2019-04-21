@@ -2,7 +2,7 @@ package ru.obolonnyy.friendhelper.main.main
 
 import android.view.View
 import ru.obolonnyy.friendhelper.main.R
-import ru.obolonnyy.friendhelper.utils.local.StandI
+import ru.obolonnyy.friendhelper.utils.data.StandI
 
 enum class FileStatus {
     NOT_LOADED,

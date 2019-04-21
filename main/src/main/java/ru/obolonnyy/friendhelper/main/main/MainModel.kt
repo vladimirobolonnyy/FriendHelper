@@ -12,7 +12,9 @@ import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
 import ru.obolonnyy.friendhelper.utils.constants.Constants
 import ru.obolonnyy.friendhelper.utils.constants.Constants.DATAPOWER
 import ru.obolonnyy.friendhelper.utils.data.MyResult
-import ru.obolonnyy.friendhelper.utils.local.StandI
+import ru.obolonnyy.friendhelper.utils.data.StandEntityInt
+import ru.obolonnyy.friendhelper.utils.data.StandI
+import ru.obolonnyy.friendhelper.utils.database.StandDataBaseOperations
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -20,7 +22,8 @@ import kotlin.coroutines.CoroutineContext
 
 class MainModel(
     val interactor: ApiInteractorInterface,
-    val filesDir: File
+    val filesDir: File,
+    val db: StandDataBaseOperations<StandEntityInt>
 ) : CoroutineScope {
 
     private var job: Job = Job()

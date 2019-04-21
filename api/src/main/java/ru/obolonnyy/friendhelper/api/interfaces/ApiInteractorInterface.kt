@@ -3,8 +3,8 @@ package ru.obolonnyy.friendhelper.api.interfaces
 import kotlinx.coroutines.Deferred
 import okhttp3.ResponseBody
 import retrofit2.Response
-import ru.obolonnyy.friendhelper.utils.local.StandI
-import ru.obolonnyy.friendhelper.utils.local.VersionDto
+import ru.obolonnyy.friendhelper.utils.data.StandI
+import ru.obolonnyy.friendhelper.utils.data.VersionDto
 
 interface ApiInteractorInterface {
 

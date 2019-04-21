@@ -10,7 +10,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.launch
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
-import ru.obolonnyy.friendhelper.utils.local.StandI
+import ru.obolonnyy.friendhelper.utils.data.StandI
 import kotlin.coroutines.CoroutineContext
 
 @ExperimentalCoroutinesApi

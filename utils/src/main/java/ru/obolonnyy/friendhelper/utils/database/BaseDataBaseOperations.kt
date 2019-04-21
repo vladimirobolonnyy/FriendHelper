@@ -6,7 +6,7 @@ interface BaseDataBaseOperations<T> {
 
     fun insertAll(elem: List<T>)
 
-    fun fetchOneMoviesbyMovieId(elemId: Int): T
+    fun getById(id: Int): T
 
     fun getAll(): List<T>
 
