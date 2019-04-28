@@ -40,28 +40,22 @@ class MainModel(
     }
 
     suspend fun getStandStatus(stand: StandI): MyResult<String> {
-        //ToDo вот с этим что-то надо сделать
         return try {
-            val response = interactor.sendEmailTemporaryCode(stand).await()
+            interactor.sendEmailTemporaryCode(stand).await()
             MyResult.Success(Constants.ONLINE)
         } catch (ex: Exception) {
             Timber.e(ex)
             when (ex) {
                 is HttpException -> {
                     val errorMessage = ex.response().errorBody()?.string()
-                    if (ex.code() == 404) {
-                        //it's ok. I expect here 404 error
-                        if (errorMessage?.contains("ERROR_ID_NOTFOUND") == true) {
-                            return MyResult.Success(Constants.ONLINE)
-                        }
-                        if (errorMessage?.contains("<!DOCTYPE html>") == true) {
-                            return MyResult.Error(ex, Constants.SERVER_REINSTALLING)
-                        }
-                    }
-                    if (errorMessage?.contains(DATAPOWER) == true) {
-                        return MyResult.Error(ex, Constants.DATA_POWER_ERROR)
-                    } else {
-                        return MyResult.Error(ex, Constants.SERVER_ERROR + " ${ex.code()}")
+                    return when {
+                        errorMessage?.contains("ERROR_ID_NOTFOUND") == true -> MyResult.Success(Constants.ONLINE)
+                        errorMessage?.contains("<!DOCTYPE html>") == true -> MyResult.Error(
+                            ex,
+                            Constants.SERVER_REINSTALLING
+                        )
+                        errorMessage?.contains(DATAPOWER) == true -> MyResult.Error(ex, Constants.DATA_POWER_ERROR)
+                        else -> MyResult.Error(ex, Constants.SERVER_ERROR + " ${ex.code()}")
                     }
                 }
                 else -> MyResult.Error(ex, Constants.NOT_HTTP_ERROR)
