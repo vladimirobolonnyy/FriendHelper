@@ -9,6 +9,6 @@ class DataBaseLoggingTree : Timber.Tree(), KoinComponent {
     val model: LogsViewModel by inject()
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        model.putSomeError(message)
+        model.putSomeLogs(message)
     }
 }

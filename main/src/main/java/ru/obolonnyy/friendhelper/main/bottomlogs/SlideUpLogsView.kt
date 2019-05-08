@@ -41,7 +41,7 @@ class SlideUpLogsView : ScopedFrameLayout, KoinComponent {
     private fun initViews() {
         recycler = this.findViewById(R.id.recycler)
         recycler.layoutManager = LinearLayoutManager(this.context)
-        adapter = SlideUpLogsAdapter(model.localText)
+        adapter = SlideUpLogsAdapter()
         recycler.adapter = adapter
         clear = this.findViewById(R.id.clear)
         clear.setOnClickListener { model.clear() }

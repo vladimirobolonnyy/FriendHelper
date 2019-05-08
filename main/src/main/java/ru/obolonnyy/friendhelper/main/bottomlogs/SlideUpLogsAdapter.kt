@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.obolonnyy.friendhelper.main.R
 
-class SlideUpLogsAdapter(val elements: MutableList<String>) : RecyclerView.Adapter<SlideUpLogsViewHolder>() {
+class SlideUpLogsAdapter(val elements: MutableList<String> = mutableListOf()) : RecyclerView.Adapter<SlideUpLogsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SlideUpLogsViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_simple_text, parent, false)

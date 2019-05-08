@@ -4,16 +4,16 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 
 class LogsViewModel {
 
+    private val localText = mutableListOf<String>()
     val text = ConflatedBroadcastChannel<List<String>>()
-    var localText = mutableListOf<String>()
 
-    fun putSomeError(error: String) {
-        localText.add(error)
+    fun putSomeLogs(message: String) {
+        localText.add(message)
         text.offer(localText)
     }
 
      fun clear() {
-        text.offer(emptyList())
-        localText = mutableListOf()
+         localText.clear()
+         text.offer(localText)
     }
 }
