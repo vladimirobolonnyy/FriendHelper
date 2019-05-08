@@ -2,20 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply from: "../deps.gradle"
+apply from: "../android_commons.gradle"
 
 android {
-    compileSdkVersion 28
-
     defaultConfig {
         applicationId "ru.obolonnyy.friendhelper"
-        minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 2
-        versionName "0.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-
     }
     buildTypes {
         debug{
@@ -23,10 +17,6 @@ android {
 //            shrinkResources true
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
-        }
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
