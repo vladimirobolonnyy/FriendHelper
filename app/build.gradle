@@ -6,7 +6,6 @@ apply from: "../android_commons.gradle"
 
 android {
     defaultConfig {
-        applicationId "ru.obolonnyy.friendhelper"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -30,7 +29,7 @@ dependencies {
     implementation project(":network")
     implementation project(":main")
 
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"

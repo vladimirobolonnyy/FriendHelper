@@ -12,10 +12,7 @@ fun Context.getColorCompat(@ColorRes colorRes: Int): Int {
 }
 
 fun Context.getAvailableDownloadsDir(): File {
-    return if (isExternalStorageAvailable() && isWriteExternalPermissionGranted(
-            this
-        )
-    ) {
+    return if (isExternalStorageAvailable() && isWriteExternalPermissionGranted(this)) {
         getExternalDownloadsDir()
     } else {
         getInternalStoragePublicDir(Environment.DIRECTORY_DOWNLOADS, this)

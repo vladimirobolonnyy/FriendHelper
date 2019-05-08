@@ -12,7 +12,7 @@ dependencies {
     implementation project(":utils")
     implementation project(":utils-android")
 
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
