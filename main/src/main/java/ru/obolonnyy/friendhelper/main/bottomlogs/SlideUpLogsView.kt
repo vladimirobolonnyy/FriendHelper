@@ -3,7 +3,8 @@ package ru.obolonnyy.friendhelper.main.bottomlogs
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import kotlinx.coroutines.Dispatchers
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import org.koin.standalone.KoinComponent
@@ -19,7 +20,7 @@ class SlideUpLogsView : ScopedFrameLayout, KoinComponent {
             super(context, attrs, defStyleAttr)
 
     val model: LogsViewModel by inject()
-    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var recycler: RecyclerView
     private lateinit var adapter: SlideUpLogsAdapter
     private lateinit var clear: View
 
@@ -39,10 +40,10 @@ class SlideUpLogsView : ScopedFrameLayout, KoinComponent {
 
     private fun initViews() {
         recycler = this.findViewById(R.id.recycler)
-        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this.context)
+        recycler.layoutManager = LinearLayoutManager(this.context)
         adapter = SlideUpLogsAdapter(model.localText)
         recycler.adapter = adapter
         clear = this.findViewById(R.id.clear)
-        clear.setOnClickListener { launch(Dispatchers.IO) { model.clear() } }
+        clear.setOnClickListener { model.clear() }
     }
 }

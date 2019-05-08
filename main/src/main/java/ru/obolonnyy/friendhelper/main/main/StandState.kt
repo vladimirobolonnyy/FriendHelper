@@ -52,40 +52,4 @@ data class StandState(
             }
         }
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StandState
-
-        if (position != other.position) return false
-        if (standI != other.standI) return false
-        if (version != other.version) return false
-        if (versionProgressVisibility != other.versionProgressVisibility) return false
-        if (status != other.status) return false
-        if (statusProgressVisibility != other.statusProgressVisibility) return false
-        if (statusColor != other.statusColor) return false
-        if (fileImageResource != other.fileImageResource) return false
-        if (fileProgressVisibility != other.fileProgressVisibility) return false
-        if (fileVisibility != other.fileVisibility) return false
-        if (fileStatus != other.fileStatus) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = position
-        result = 31 * result + standI.hashCode()
-        result = 31 * result + version.hashCode()
-        result = 31 * result + versionProgressVisibility
-        result = 31 * result + status.hashCode()
-        result = 31 * result + statusProgressVisibility
-        result = 31 * result + statusColor
-        result = 31 * result + fileImageResource
-        result = 31 * result + fileProgressVisibility
-        result = 31 * result + fileVisibility
-        result = 31 * result + fileStatus.hashCode()
-        return result
-    }
 }
