@@ -11,6 +11,7 @@ import ru.obolonnyy.friendhelper.main.main.MainViewModel
 import ru.obolonnyy.friendhelper.main.second.SecondViewModel
 import ru.obolonnyy.friendhelper.network.ApiInteractor
 import ru.obolonnyy.friendhelper.network.ElementsGenerator.initElements
+import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
 import ru.obolonnyy.friendhelper.utils.database.BaseDataBaseOperations
 import ru.obolonnyy.friendhelper.utils.database.MainDataBase
 import ru.obolonnyy.friendhelper.utils.database.MainElementInt
@@ -20,7 +21,7 @@ import ru.obolonnyy.friendhelper.utilsandroid.getAvailableDownloadsDir
 import java.io.File
 
 val appModule = module {
-    single("provider") { "${BuildConfig.APPLICATION_ID}.provider" }
+    single(PROVIDER) { "${BuildConfig.APPLICATION_ID}.provider" }
 }
 
 val mainModule = module {
@@ -43,5 +44,3 @@ val roomModule = module {
 }
 
 val koinModules = listOf(appModule, mainModule, networkModule, roomModule)
-
-private const val DATABASE_NAME = "main_db"

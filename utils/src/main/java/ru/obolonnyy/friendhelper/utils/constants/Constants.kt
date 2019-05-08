@@ -10,3 +10,8 @@ object Constants {
     const val DATA_POWER_ERROR = "DataPower error"
     const val DATAPOWER = "DataPower"
 }
+
+object KoinConstants {
+
+    const val PROVIDER = "provider"
+}

@@ -9,12 +9,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import ru.obolonnyy.friendhelper.main.R
+import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
 import ru.obolonnyy.friendhelper.utilsandroid.ScopedFragment
 import java.io.File
 
@@ -23,12 +27,12 @@ import java.io.File
 class MainFragment : ScopedFragment() {
 
     val viewModel: MainViewModel by inject()
-    val provider: String by inject("provider")
+    val provider: String by inject(PROVIDER)
 
-    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var recycler: RecyclerView
     private lateinit var adapter: MainAdapter
     private lateinit var root: View
-    private lateinit var swipe: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    private lateinit var swipe: SwipeRefreshLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,7 +50,7 @@ class MainFragment : ScopedFragment() {
     private fun initViews(view: View) {
         root = view.findViewById(R.id.main)
         recycler = view.findViewById(R.id.recycler)
-        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this.context)
+        recycler.layoutManager = LinearLayoutManager(this.context)
         adapter = createAdapter()
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
@@ -86,7 +90,7 @@ class MainFragment : ScopedFragment() {
         val type = mime.getMimeTypeFromExtension(ext)
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= 24) {
             intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             val contentUri = FileProvider.getUriForFile(context!!, provider, file)
             intent.setDataAndType(contentUri, type)
