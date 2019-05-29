@@ -28,4 +28,12 @@ class StandRepositoryImpl(private val db: StandDataBaseOperations<StandEntityInt
         )
         db.insert(elem)
     }
+
+    override suspend fun getAllData(): List<StandEntityInt> {
+        return db.getAll()
+    }
+/*
+     fun StandEntityImpl.toLocal() : StandEntityInt {
+        return StandEntity(this.timeStamp, this.stringName, this.version, this.status)
+    }*/
 }

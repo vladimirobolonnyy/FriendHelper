@@ -55,14 +55,11 @@ class MainFragment : ScopedFragment() {
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
         swipe.setOnRefreshListener { refreshItems() }
+        view.findViewById<View>(R.id.second).setOnClickListener {  }
     }
 
     private fun observeViewModel() {
         launch { viewModel.viewChannel.consumeEach(::render) }
-    }
-
-    private fun render(items: List<StandState>) {
-        adapter.updateItems(items)
     }
 
     private fun render(state: MainViewState) {
