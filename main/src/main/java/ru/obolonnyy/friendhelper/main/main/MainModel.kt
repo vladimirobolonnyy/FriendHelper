@@ -2,7 +2,9 @@ package ru.obolonnyy.friendhelper.main.main
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import okio.BufferedSink
 import okio.Okio
@@ -12,9 +14,8 @@ import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
 import ru.obolonnyy.friendhelper.utils.constants.Constants
 import ru.obolonnyy.friendhelper.utils.constants.Constants.DATAPOWER
 import ru.obolonnyy.friendhelper.utils.data.MyResult
-import ru.obolonnyy.friendhelper.utils.data.StandEntityInt
 import ru.obolonnyy.friendhelper.utils.data.StandI
-import ru.obolonnyy.friendhelper.utils.database.StandDataBaseOperations
+import ru.obolonnyy.friendhelper.utils.database.StandRepository
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -23,7 +24,7 @@ import kotlin.coroutines.CoroutineContext
 class MainModel(
     val interactor: ApiInteractorInterface,
     val filesDir: File,
-    val db: StandDataBaseOperations<StandEntityInt>
+    val repository: StandRepository
 ) : CoroutineScope {
 
     private var job: Job = Job()
@@ -35,7 +36,9 @@ class MainModel(
     suspend fun getStandVersion(state: StandI): MyResult<String> {
         return try {
             val response = interactor.getVersion(state).await()
-            MyResult.Success(response.version!!)
+            val version = response.version!!
+            withContext(IO){ repository.saveVersion(state, version) }
+            MyResult.Success(version)
         } catch (ex: Exception) {
             Timber.e(ex)
             MyResult.Error(ex, Constants.ERROR)
@@ -43,7 +46,7 @@ class MainModel(
     }
 
     suspend fun getStandStatus(stand: StandI): MyResult<String> {
-        return try {
+        val res = try {
             interactor.sendEmailTemporaryCode(stand).await()
             MyResult.Success(Constants.ONLINE)
         } catch (ex: Exception) {
@@ -64,6 +67,8 @@ class MainModel(
                 else -> MyResult.Error(ex, Constants.NOT_HTTP_ERROR)
             }
         }
+        withContext(IO){ repository.saveStatus(stand, res.stringResult()) }
+        return res
     }
 
     suspend fun downloadFile(state: StandState): MyResult<Any> {
