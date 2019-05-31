@@ -37,7 +37,7 @@ class MainModel(
         return try {
             val response = interactor.getVersion(state).await()
             val version = response.version!!
-            withContext(IO){ repository.saveVersion(state, version) }
+            withContext(IO) { repository.saveVersion(state, version) }
             MyResult.Success(version)
         } catch (ex: Exception) {
             Timber.e(ex)
@@ -54,7 +54,7 @@ class MainModel(
             when (ex) {
                 is HttpException -> {
                     val errorMessage = ex.response().errorBody()?.string()
-                    return when {
+                    when {
                         errorMessage?.contains("ERROR_ID_NOTFOUND") == true -> MyResult.Success(Constants.ONLINE)
                         errorMessage?.contains("<!DOCTYPE html>") == true -> MyResult.Error(
                             ex,
@@ -67,7 +67,7 @@ class MainModel(
                 else -> MyResult.Error(ex, Constants.NOT_HTTP_ERROR)
             }
         }
-        withContext(IO){ repository.saveStatus(stand, res.stringResult()) }
+        withContext(IO) { repository.saveStatus(stand, res.stringResult()) }
         return res
     }
 

@@ -10,6 +10,7 @@ import ru.obolonnyy.friendhelper.main.main.MainModel
 import ru.obolonnyy.friendhelper.main.main.MainViewModel
 import ru.obolonnyy.friendhelper.network.ApiInteractor
 import ru.obolonnyy.friendhelper.network.ElementsGenerator.initElements
+import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.CONTAINER
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
 import ru.obolonnyy.friendhelper.utils.database.StandRepository
 import ru.obolonnyy.friendhelper.utilsandroid.getAvailableDownloadsDir
@@ -25,6 +26,7 @@ val mainModule = module {
     single { androidContext().getAvailableDownloadsDir() }
     single { MainModel(interactor = get(), filesDir = get(), repository = get()) }
     single { MainViewModel(get(), get()) }
+    single(CONTAINER) { (R.id.container) }
 }
 
 val networkModule = module {

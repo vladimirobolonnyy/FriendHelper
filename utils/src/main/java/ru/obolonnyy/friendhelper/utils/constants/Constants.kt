@@ -12,6 +12,6 @@ object Constants {
 }
 
 object KoinConstants {
-
+    const val CONTAINER = "Container"
     const val PROVIDER = "provider"
 }

@@ -14,7 +14,7 @@ interface MainElementDao {
     @Insert
     fun insertAll(elem: List<StandEntityImpl>)
 
-    @Query("SELECT * FROM StandEntityImpl")
+    @Query("SELECT * FROM StandEntityImpl ORDER BY stringName, roomId DESC")
     fun getAll(): List<StandEntityImpl>
 }
 

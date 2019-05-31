@@ -4,7 +4,8 @@
     android:id="@+id/second_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main.MainFragment">
+    android:background="@color/white"
+    tools:context=".second.SecondFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"

@@ -22,7 +22,6 @@
         tools:context=".MainActivity">
     </FrameLayout>
     
-    <include layout="@layout/layout_logs_view"
-             tools:visibility="gone"/>
+    <include layout="@layout/layout_logs_view" tools:visibility="gone"/>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

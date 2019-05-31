@@ -43,8 +43,8 @@ class SecondFragment : ScopedFragment() {
         val standStates = data
             .mapIndexed { index: Int, standEntityInt: StandEntityInt -> StandState(index, standEntityInt.toI()) }
         standStates.forEachIndexed { index: Int, standState: StandState ->
-            standState.version = data[index].version!!
-            standState.status = data[index].status!!
+            standState.version = data[index].version ?: ""
+            standState.status = data[index].status ?: ""
         }
         recycler = view.findViewById(R.id.recycler)
         recycler.layoutManager = LinearLayoutManager(context)
@@ -66,5 +66,9 @@ class SecondFragment : ScopedFragment() {
             engName = this.stringName,
             context = ""
         )
+    }
+
+    companion object {
+        fun newInstance() = SecondFragment()
     }
 }
