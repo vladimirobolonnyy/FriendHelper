@@ -1,6 +1,5 @@
 package ru.obolonnyy.friendhelper.network
 
-import kotlinx.coroutines.Deferred
 import okhttp3.ResponseBody
 import retrofit2.Response
 import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
@@ -13,15 +12,15 @@ class ApiInteractor : ApiInteractorInterface {
 
     private val apis: Map<StandI, ServerApi> = createRetrofits()
 
-    override suspend fun getVersion(stand: StandI): Deferred<VersionDto> {
+    override suspend fun getVersion(stand: StandI): VersionDto {
         return apis[stand]!!.getVersion()
     }
 
-    override suspend fun sendEmailTemporaryCode(stand: StandI): Deferred<Any> {
+    override suspend fun sendEmailTemporaryCode(stand: StandI): Any {
         return apis[stand]!!.sendEmailTemporaryCode(stand.context)
     }
 
-    override suspend fun downloadApk(stand: StandI): Deferred<Response<ResponseBody>> {
+    override suspend fun downloadApk(stand: StandI): Response<ResponseBody> {
         return apis[stand]!!.downloadApk()
     }
 }

@@ -35,7 +35,7 @@ class MainModel(
 
     suspend fun getStandVersion(state: StandI): MyResult<String> {
         return try {
-            val response = interactor.getVersion(state).await()
+            val response = interactor.getVersion(state)
             val version = response.version!!
             withContext(IO) { repository.saveVersion(state, version) }
             MyResult.Success(version)
@@ -47,13 +47,13 @@ class MainModel(
 
     suspend fun getStandStatus(stand: StandI): MyResult<String> {
         val res = try {
-            interactor.sendEmailTemporaryCode(stand).await()
+            interactor.sendEmailTemporaryCode(stand)
             MyResult.Success(Constants.ONLINE)
         } catch (ex: Exception) {
             Timber.e(ex)
             when (ex) {
                 is HttpException -> {
-                    val errorMessage = ex.response().errorBody()?.string()
+                    val errorMessage = ex.response()?.errorBody()?.string()
                     when {
                         errorMessage?.contains("ERROR_ID_NOTFOUND") == true -> MyResult.Success(Constants.ONLINE)
                         errorMessage?.contains("<!DOCTYPE html>") == true -> MyResult.Error(
@@ -73,7 +73,7 @@ class MainModel(
 
     suspend fun downloadFile(state: StandState): MyResult<Any> {
         return try {
-            val response = interactor.downloadApk(state.standI).await()
+            val response = interactor.downloadApk(state.standI)
             saveApkToFile(response, state)
             MyResult.Success("")
         } catch (ex: Exception) {
