@@ -26,8 +26,8 @@ class SlideUpLogsView : ScopedFrameLayout, KoinComponent {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        initViews()
-        observeViewModel()
+//        initViews()
+//        observeViewModel()
     }
 
     private fun observeViewModel() {

@@ -59,9 +59,9 @@ class MainFragment : ScopedFragment() {
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
         swipe.setOnRefreshListener { refreshItems() }
-        view.findViewById<View>(R.id.second).setOnClickListener {
+ /*       view.findViewById<View>(R.id.second).setOnClickListener {
             navigateToSecondFragment()
-        }
+        }*/
     }
 
     private fun navigateToSecondFragment() {
