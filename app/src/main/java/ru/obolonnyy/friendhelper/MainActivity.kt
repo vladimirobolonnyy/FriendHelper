@@ -8,7 +8,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import org.koin.android.ext.android.inject
 import ru.obolonnyy.friendhelper.main.main.MainFragment
 import timber.log.Timber
 
@@ -17,13 +16,11 @@ import timber.log.Timber
 @ObsoleteCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
-    private val tree: DataBaseLoggingTree by inject()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         if (BuildConfig.DEBUG) {
-            Timber.plant(tree)
+            Timber.plant(DataBaseLoggingTree())
         }
 
         if (savedInstanceState == null) {

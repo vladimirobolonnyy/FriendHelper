@@ -1,14 +1,10 @@
 package ru.obolonnyy.friendhelper
 
 import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
-import ru.obolonnyy.friendhelper.main.bottomlogs.LogsViewModel
 import timber.log.Timber
 
-class DataBaseLoggingTree : Timber.Tree(), KoinComponent {
-    val model: LogsViewModel by inject()
-
+class DataBaseLoggingTree() : Timber.Tree(), KoinComponent {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        model.putSomeLogs(message)
+        super.log(priority, tag, message, t)
     }
 }

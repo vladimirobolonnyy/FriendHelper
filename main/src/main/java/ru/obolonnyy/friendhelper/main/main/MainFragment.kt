@@ -10,27 +10,19 @@ import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import ru.obolonnyy.friendhelper.main.R
-import ru.obolonnyy.friendhelper.main.second.SecondFragment
-import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.CONTAINER
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
-import ru.obolonnyy.friendhelper.utilsandroid.ScopedFragment
 import java.io.File
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
-class MainFragment : ScopedFragment() {
+class MainFragment : Fragment() {
 
-    val viewModel: MainViewModel by inject()
-    val container: Int by inject(CONTAINER)
+    lateinit var viewModel: MainViewModel
     val provider: String by inject(PROVIDER)
 
     private lateinit var recycler: RecyclerView
@@ -47,8 +39,9 @@ class MainFragment : ScopedFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews(view)
         observeViewModel()
+
+        initViews(view)
     }
 
     private fun initViews(view: View) {
@@ -59,29 +52,13 @@ class MainFragment : ScopedFragment() {
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
         swipe.setOnRefreshListener { refreshItems() }
-        view.findViewById<View>(R.id.second).setOnClickListener {
-            navigateToSecondFragment()
-        }
-    }
-
-    private fun navigateToSecondFragment() {
-        navigate(SecondFragment.newInstance())
-    }
-
-    private fun navigate(fragment: Fragment) {
-        val tag = fragment.javaClass.simpleName
-        val transaction = fragmentManager!!.beginTransaction()
-            .setCustomAnimations(
-                R.animator.fade_in, R.animator.fade_out,
-                R.animator.fade_in, R.animator.fade_out
-            )
-            .add(container, fragment, tag)
-        transaction.addToBackStack(tag)
-        transaction.commit()
     }
 
     private fun observeViewModel() {
-        launch { viewModel.viewChannel.consumeEach(::render) }
+        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+
+        viewModel.viewChannel().observe(this, Observer { it -> render(it) })
+
     }
 
     private fun render(state: MainViewState) {

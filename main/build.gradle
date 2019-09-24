@@ -32,4 +32,7 @@ dependencies {
     implementation "org.koin:koin-android:$versions.koin"
     implementation "org.koin:koin-android-scope:$versions.koin"
     implementation "org.koin:koin-android-viewmodel:$versions.koin"
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.arch}"
+    implementation "androidx.lifecycle:lifecycle-extensions:${versions.arch}"
 }

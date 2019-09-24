@@ -1,31 +1,29 @@
 package ru.obolonnyy.friendhelper.main.main
 
 import android.view.View
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.inject
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
-import kotlin.coroutines.CoroutineContext
 
-@ExperimentalCoroutinesApi
 class MainViewModel(
-    private val mainModel: MainModel,
-    elements: List<StandI>
-) : CoroutineScope {
 
-    private var job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+) : ViewModel(), KoinComponent {
 
-    val viewChannel = ConflatedBroadcastChannel<MainViewState>()
+    val mainModel: MainModel by inject()
+    val elements: List<StandI>  by inject()
+
+    private val _viewChannel = MutableLiveData<MainViewState>()
+    fun viewChannel() = _viewChannel
     private var viewState = MainViewState()
 
     init {
@@ -35,7 +33,7 @@ class MainViewModel(
             elementsState.add(state)
         }
         viewState = MainViewState(items = elementsState)
-        viewChannel.offer(viewState)
+        _viewChannel.postValue(viewState)
         refresh()
     }
 
@@ -47,12 +45,12 @@ class MainViewModel(
     }
 
     fun onVersionClicked(state: StandState) {
-        launch {
+        viewModelScope.launch {
             val pos = state.position
             viewState.file = null
             viewState.items?.get(pos)!!.versionProgressVisibility = View.VISIBLE
             viewState.items?.get(pos)!!.version = ""
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
             val result = mainModel.getStandVersion(state.standI)
             when (result) {
                 is MyResult.Success -> {
@@ -67,17 +65,17 @@ class MainViewModel(
             if (mainModel.fileExists(state)) {
                 state.changeFileState(FileStatus.LOADED)
             }
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
         }
     }
 
     fun onStatusClicked(state: StandState) {
-        launch {
+        viewModelScope.launch {
             val pos = state.position
             viewState.file = null
             viewState.items?.get(pos)!!.statusProgressVisibility = View.VISIBLE
             viewState.items?.get(pos)!!.status = ""
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
             val result = mainModel.getStandStatus(state.standI)
             when (result) {
                 is MyResult.Success -> {
@@ -90,7 +88,7 @@ class MainViewModel(
                 }
             }
             viewState.items?.get(pos)!!.statusProgressVisibility = View.GONE
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
         }
     }
 
@@ -101,17 +99,17 @@ class MainViewModel(
             }
             FileStatus.LOADED -> {
                 viewState = viewState.copy(file = mainModel.getApkFile(state))
-                viewChannel.offer(viewState)
+                _viewChannel.postValue(viewState)
             }
             FileStatus.ERROR -> downloadFile(state)
         }
     }
 
     private fun downloadFile(state: StandState) {
-        GlobalScope.launch (Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO) {
             val pos = state.position
             viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING(0))
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
             val channel = Channel<Int>(1)
             val result = mainModel.downloadFile(state, channel)
             when (result) {
@@ -120,17 +118,17 @@ class MainViewModel(
                         channel.consumeEach {
                             if (it <= 99) {
                                 viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING(it))
-                                viewChannel.offer(viewState)
+                                _viewChannel.postValue(viewState)
                             } else {
                                 viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADED)
-                                viewChannel.offer(viewState)
+                                _viewChannel.postValue(viewState)
                             }
                         }
                     }
                 }
                 is MyResult.Error -> {
                     viewState.items?.get(pos)!!.changeFileState(FileStatus.ERROR)
-                    viewChannel.offer(viewState)
+                    _viewChannel.postValue(viewState)
                 }
             }
         }

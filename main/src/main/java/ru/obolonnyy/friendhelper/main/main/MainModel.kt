@@ -1,12 +1,10 @@
 package ru.obolonnyy.friendhelper.main.main
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import okio.BufferedSink
 import okio.Okio
@@ -19,33 +17,24 @@ import ru.obolonnyy.friendhelper.utils.constants.Constants
 import ru.obolonnyy.friendhelper.utils.constants.Constants.DATAPOWER
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
-import ru.obolonnyy.friendhelper.utils.database.StandRepository
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import kotlin.coroutines.CoroutineContext
 
 
 class MainModel(
     val interactor: ApiInteractorInterface,
-    val filesDir: File,
-    val repository: StandRepository
-) : CoroutineScope {
-
-    private var job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    val filesDir: File
+) : ViewModel() {
 
     private val getJustApkFileName = "friend.apk"
 
     suspend fun getStandVersion(state: StandI): MyResult<String> {
         return try {
-            val response = interactor.getVersion(state)
-            val version = response.version!!
-            withContext(IO) { repository.saveVersion(state, version) }
+            val version = interactor.getVersion(state)
             MyResult.Success(version)
         } catch (ex: Exception) {
             Timber.e(ex)
@@ -75,7 +64,6 @@ class MainModel(
                 else -> MyResult.Error(ex, Constants.NOT_HTTP_ERROR)
             }
         }
-        withContext(IO) { repository.saveStatus(stand, res.stringResult()) }
         return res
     }
 
@@ -89,7 +77,7 @@ class MainModel(
                     if (response.isSuccessful) {
                         Timber.i("server contacted and has file")
 
-                        launch(IO) {
+                        viewModelScope.launch(IO) {
                             val writtenToDisk = writeResponseBodyToDisk(response.body()!!, state, channel)
                             Timber.i("file download was a success? $writtenToDisk")
                         }
@@ -175,7 +163,7 @@ class MainModel(
             } catch (e: IOException) {
                 return false
             } finally {
-                launch { channel.send(100) }
+                viewModelScope.launch { channel.send(100) }
                 inputStream?.close()
                 outputStream?.close()
             }
