@@ -4,11 +4,11 @@ import android.view.View
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.StandI
 
-enum class FileStatus {
-    NOT_LOADED,
-    LOADING,
-    LOADED,
-    ERROR
+sealed class FileStatus {
+    object NOT_LOADED : FileStatus()
+    data class LOADING(val process: Int) : FileStatus()
+    object LOADED : FileStatus()
+    object ERROR : FileStatus()
 }
 
 data class StandState(
@@ -23,7 +23,8 @@ data class StandState(
 
     var fileImageResource: Int = R.drawable.ic_download,
     var fileProgressVisibility: Int = View.GONE,
-    var fileVisibility: Int = View.GONE
+    var fileVisibility: Int = View.GONE,
+    var downloadProgress: Int = 0
 ) {
 
     var fileStatus: FileStatus = FileStatus.NOT_LOADED
@@ -36,9 +37,10 @@ data class StandState(
                 fileImageResource = R.drawable.ic_download
                 fileProgressVisibility = View.GONE
             }
-            FileStatus.LOADING -> {
+            is FileStatus.LOADING -> {
                 fileVisibility = View.INVISIBLE
                 fileProgressVisibility = View.VISIBLE
+                downloadProgress = (status as FileStatus.LOADING).process
             }
             FileStatus.LOADED -> {
                 fileVisibility = View.VISIBLE

@@ -6,7 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
@@ -55,7 +57,7 @@ class MainViewModel(
             when (result) {
                 is MyResult.Success -> {
                     viewState.items?.get(pos)!!.version = result.data
-                    if (viewState.items?.get(pos)!!.fileStatus != FileStatus.LOADING) {
+                    if (viewState.items?.get(pos)!!.fileStatus != FileStatus.LOADING(0)) {
                         viewState.items?.get(pos)!!.fileVisibility = View.VISIBLE
                     }
                 }
@@ -95,7 +97,7 @@ class MainViewModel(
     fun onFileClicked(state: StandState) {
         when (state.fileStatus) {
             FileStatus.NOT_LOADED -> downloadFile(state)
-            FileStatus.LOADING -> { /* no need to do anything*/
+            is FileStatus.LOADING -> { /* no need to do anything*/
             }
             FileStatus.LOADED -> {
                 viewState = viewState.copy(file = mainModel.getApkFile(state))
@@ -108,14 +110,29 @@ class MainViewModel(
     private fun downloadFile(state: StandState) {
         GlobalScope.launch (Dispatchers.IO) {
             val pos = state.position
-            viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING)
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING(0))
             viewChannel.offer(viewState)
-            val result = mainModel.downloadFile(state)
+            val channel = Channel<Int>(1)
+            val result = mainModel.downloadFile(state, channel)
             when (result) {
-                is MyResult.Success -> viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADED)
-                is MyResult.Error -> viewState.items?.get(pos)!!.changeFileState(FileStatus.ERROR)
+                is MyResult.Success -> {
+                    launch {
+                        channel.consumeEach {
+                            if (it <= 99) {
+                                viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING(it))
+                                viewChannel.offer(viewState)
+                            } else {
+                                viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADED)
+                                viewChannel.offer(viewState)
+                            }
+                        }
+                    }
+                }
+                is MyResult.Error -> {
+                    viewState.items?.get(pos)!!.changeFileState(FileStatus.ERROR)
+                    viewChannel.offer(viewState)
+                }
             }
-            viewChannel.offer(viewState)
         }
     }
 }

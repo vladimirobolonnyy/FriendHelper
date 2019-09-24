@@ -4,10 +4,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import okio.BufferedSink
 import okio.Okio
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
 import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
@@ -18,8 +22,12 @@ import ru.obolonnyy.friendhelper.utils.data.StandI
 import ru.obolonnyy.friendhelper.utils.database.StandRepository
 import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.coroutines.CoroutineContext
+
 
 class MainModel(
     val interactor: ApiInteractorInterface,
@@ -71,16 +79,37 @@ class MainModel(
         return res
     }
 
-    suspend fun downloadFile(state: StandState): MyResult<Any> {
+    fun downloadFile(state: StandState, channel: Channel<Int>): MyResult<Any> {
+
         return try {
-            val response = interactor.downloadApk(state.standI)
-            saveApkToFile(response, state)
+            val call = interactor.downloadApk(state.standI)
+            call.enqueue(object : Callback<ResponseBody> {
+
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    if (response.isSuccessful) {
+                        Timber.i("server contacted and has file")
+
+                        launch(IO) {
+                            val writtenToDisk = writeResponseBodyToDisk(response.body()!!, state, channel)
+                            Timber.i("file download was a success? $writtenToDisk")
+                        }
+
+                    } else {
+                        Timber.i("server contact failed")
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Timber.e(t)
+                }
+            })
             MyResult.Success("")
         } catch (ex: Exception) {
             Timber.e(ex)
             MyResult.Error(ex, ex.localizedMessage)
         }
     }
+
 
     fun fileExists(state: StandState): Boolean {
         return getApkFile(state).exists()
@@ -90,7 +119,7 @@ class MainModel(
         return File(filesDir.toString() + getApkPath(state) + getJustApkFileName)
     }
 
-    private fun saveApkToFile(response: Response<ResponseBody>, state: StandState) {
+    private fun saveApkToFile(response: ResponseBody, state: StandState): Boolean {
         val filePath = getApkPathFile(state)
         var sink: BufferedSink? = null
         try {
@@ -100,9 +129,11 @@ class MainModel(
             val file = File("$filePath/$getJustApkFileName")
             file.createNewFile()
             sink = Okio.buffer(Okio.sink(file))
-            sink.writeAll(response.body()!!.source())
+            sink.writeAll(response.source())
+            return true;
         } catch (ex: Exception) {
             Timber.e(ex, "sink writing error")
+            return false
         } finally {
             try {
                 sink?.close()
@@ -110,6 +141,48 @@ class MainModel(
                 Timber.e(ex, "sink closing error")
             }
         }
+    }
+
+    private fun writeResponseBodyToDisk(body: ResponseBody, state: StandState, channel: Channel<Int>): Boolean {
+        try {
+            val filePath = getApkPathFile(state)
+            if (!filePath.exists()) {
+                filePath.mkdirs()
+            }
+            val file = File("$filePath/$getJustApkFileName")
+            file.createNewFile()
+            var inputStream: InputStream? = null
+            var outputStream: OutputStream? = null
+            try {
+                val fileReader = ByteArray(4096)
+                val fileSize = body.contentLength()
+                var fileSizeDownloaded: Long = 0
+                inputStream = body.byteStream()
+                outputStream = FileOutputStream(file)
+                while (true) {
+                    val read = inputStream!!.read(fileReader)
+                    Timber.i("readed ${fileReader.size}")
+                    if (read == -1) {
+                        break
+                    }
+                    outputStream.write(fileReader, 0, read)
+                    fileSizeDownloaded += read.toLong()
+                    Timber.i("file download: $fileSizeDownloaded of $fileSize")
+                    channel.offer((fileSizeDownloaded * 100 / fileSize).toInt())
+                }
+                outputStream.flush()
+                return true
+            } catch (e: IOException) {
+                return false
+            } finally {
+                launch { channel.send(100) }
+                inputStream?.close()
+                outputStream?.close()
+            }
+        } catch (e: IOException) {
+            return false
+        }
+
     }
 
     private fun getApkPathFile(state: StandState): File {

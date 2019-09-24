@@ -1,7 +1,7 @@
 package ru.obolonnyy.friendhelper.network
 
 import okhttp3.ResponseBody
-import retrofit2.Response
+import retrofit2.Call
 import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
 import ru.obolonnyy.friendhelper.network.RetrofitHelper.createRetrofits
 import ru.obolonnyy.friendhelper.utils.data.StandI
@@ -20,7 +20,7 @@ class ApiInteractor : ApiInteractorInterface {
         return apis[stand]!!.sendEmailTemporaryCode(stand.context)
     }
 
-    override suspend fun downloadApk(stand: StandI): Response<ResponseBody> {
+    override  fun downloadApk(stand: StandI): Call<ResponseBody> {
         return apis[stand]!!.downloadApk()
     }
 }

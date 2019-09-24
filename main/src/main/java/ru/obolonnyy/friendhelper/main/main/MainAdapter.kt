@@ -45,6 +45,8 @@ class MainAdapter(
         file.setOnClickListener { onFileClicked(elem) }
         file.isClickable = elem.fileProgressVisibility == View.GONE
         fileProgress.visibility = elem.fileProgressVisibility
+
+        downloadProgress.text = if (elem.downloadProgress == 0 && elem.downloadProgress == 100) "" else "${elem.downloadProgress}"
     }
 
     fun updateItems(newItems: List<StandState>) {

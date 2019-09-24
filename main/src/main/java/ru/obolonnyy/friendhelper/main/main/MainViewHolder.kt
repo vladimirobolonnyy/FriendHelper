@@ -14,4 +14,5 @@ class MainViewHolder(root: View) : androidx.recyclerview.widget.RecyclerView.Vie
     val statusProgress = root.findViewById<ProgressBar>(R.id.progress_status)!!
     val file = root.findViewById<ImageView>(R.id.download)!!
     val fileProgress = root.findViewById<ProgressBar>(R.id.progress_download)!!
+    val downloadProgress = root.findViewById<TextView>(R.id.download_progress)!!
 }
