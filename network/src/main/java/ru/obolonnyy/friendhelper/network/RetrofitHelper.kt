@@ -27,7 +27,6 @@ object RetrofitHelper {
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .addInterceptor(ShortTimberLoggingInterceptor())
             .build()
     }
 

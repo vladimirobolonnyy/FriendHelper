@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         if (BuildConfig.DEBUG) {
-            Timber.plant(DataBaseLoggingTree())
+            Timber.plant(LoggingTree())
         }
 
         if (savedInstanceState == null) {

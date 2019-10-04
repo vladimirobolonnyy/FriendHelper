@@ -15,9 +15,7 @@ import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
 
-class MainViewModel(
-
-) : ViewModel(), KoinComponent {
+class MainViewModel : ViewModel(), KoinComponent {
 
     val mainModel: MainModel by inject()
     val elements: List<StandI>  by inject()

@@ -1,5 +1,7 @@
 include ':app',
-        ':api', ':utils', ':utils-android',
-        ':database', ':network',
+        ':api',
+        ':utils',
+        ':utils-android',
+        ':network',
         ':ServerApi',
         ':main'

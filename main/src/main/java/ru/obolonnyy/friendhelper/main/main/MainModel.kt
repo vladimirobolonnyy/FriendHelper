@@ -12,7 +12,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
-import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
+import ru.obolonnyy.friendhelper.api.ApiInteractor
 import ru.obolonnyy.friendhelper.utils.constants.Constants
 import ru.obolonnyy.friendhelper.utils.constants.Constants.DATAPOWER
 import ru.obolonnyy.friendhelper.utils.data.MyResult
@@ -26,7 +26,7 @@ import java.io.OutputStream
 
 
 class MainModel(
-    val interactor: ApiInteractorInterface,
+    val interactor: ApiInteractor,
     val filesDir: File
 ) : ViewModel() {
 
@@ -35,10 +35,12 @@ class MainModel(
     suspend fun getStandVersion(state: StandI): MyResult<String> {
         return try {
             val version = interactor.getVersion(state)
+            Timber.i("#### version:=${version}")
             MyResult.Success(version)
         } catch (ex: Exception) {
             Timber.e(ex)
-            MyResult.Error(ex, Constants.ERROR)
+            Timber.i("#### ex:=${ex}")
+            MyResult.Error(ex, Constants.ERROR + ex)
         }
     }
 

@@ -2,12 +2,12 @@ package ru.obolonnyy.friendhelper.network
 
 import okhttp3.ResponseBody
 import retrofit2.Call
-import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
+import ru.obolonnyy.friendhelper.api.ApiInteractor
 import ru.obolonnyy.friendhelper.network.RetrofitHelper.createRetrofits
 import ru.obolonnyy.friendhelper.utils.data.StandI
 import ru.obolonnyy.priv.network.ServerApi
 
-class ApiInteractor : ApiInteractorInterface {
+class ApiInteractorImpl : ApiInteractor {
 
     private val apis: Map<StandI, ServerApi> = createRetrofits()
 

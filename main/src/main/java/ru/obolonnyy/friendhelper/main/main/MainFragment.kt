@@ -11,7 +11,7 @@ import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -40,7 +40,6 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
-
         initViews(view)
     }
 
@@ -55,10 +54,8 @@ class MainFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-
-        viewModel.viewChannel().observe(this, Observer { it -> render(it) })
-
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel.viewChannel().observe(this, Observer { render(it) })
     }
 
     private fun render(state: MainViewState) {
@@ -74,7 +71,6 @@ class MainFragment : Fragment() {
     }
 
     private fun createAdapter() = MainAdapter(
-        elements = mutableListOf(),
         onVersionClicked = viewModel::onVersionClicked,
         onStatusClicked = viewModel::onStatusClicked,
         onFileClicked = viewModel::onFileClicked

@@ -2,9 +2,9 @@ package ru.obolonnyy.friendhelper
 
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module.module
-import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
+import ru.obolonnyy.friendhelper.api.ApiInteractor
 import ru.obolonnyy.friendhelper.main.main.MainModel
-import ru.obolonnyy.friendhelper.network.ApiInteractor
+import ru.obolonnyy.friendhelper.network.ApiInteractorImpl
 import ru.obolonnyy.friendhelper.network.ElementsGenerator.initElements
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.CONTAINER
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
@@ -22,7 +22,7 @@ val mainModule = module {
 }
 
 val networkModule = module {
-    single<ApiInteractorInterface> { ApiInteractor() }
+    single<ApiInteractor> { ApiInteractorImpl() }
 }
 
 val koinModules = listOf(appModule, mainModule, networkModule)

@@ -1,10 +1,10 @@
-package ru.obolonnyy.friendhelper.api.interfaces
+package ru.obolonnyy.friendhelper.api
 
 import okhttp3.ResponseBody
 import retrofit2.Call
 import ru.obolonnyy.friendhelper.utils.data.StandI
 
-interface ApiInteractorInterface {
+interface ApiInteractor {
 
     suspend fun getVersion(stand: StandI): String
     suspend fun sendEmailTemporaryCode(stand: StandI): Any

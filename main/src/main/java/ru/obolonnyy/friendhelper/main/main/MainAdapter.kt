@@ -3,16 +3,18 @@ package ru.obolonnyy.friendhelper.main.main
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import ru.obolonnyy.friendhelper.utilsandroid.getColorCompat
 
 
 class MainAdapter(
-    private var elements: MutableList<StandState>,
     val onVersionClicked: (StandState) -> (Unit),
     val onStatusClicked: (StandState) -> (Unit),
     val onFileClicked: (StandState) -> (Unit)
 ) : Adapter<MainViewHolder>() {
+
+    private var elements: MutableList<StandState> = mutableListOf()
 
     override fun getItemCount() = elements.size
 
@@ -50,11 +52,26 @@ class MainAdapter(
     }
 
     fun updateItems(newItems: List<StandState>) {
-        // Here DiffUtilCallback doesn't work, because we always working with the same elements (objects).
-        // ViewModel change their states and DiffUtilCallback can't find the difference.
-        if (elements.isNullOrEmpty()){
-            elements.addAll(newItems)
+        val diffResult = DiffUtil.calculateDiff(StructureDiffCallback(elements, newItems))
+        elements.clear()
+        elements.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class StructureDiffCallback(
+        private val oldList: List<StandState>,
+        private val newList: List<StandState>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return true // because we have the same element all the time
         }
-        notifyDataSetChanged()
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+            oldList[oldItemPosition] == newList[newItemPosition]
     }
 }
