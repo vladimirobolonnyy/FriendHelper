@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import ru.obolonnyy.friendhelper.main.main.MainFragment
-import timber.log.Timber
 
 
 @ExperimentalCoroutinesApi
@@ -19,9 +18,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
-        if (BuildConfig.DEBUG) {
-            Timber.plant(LoggingTree())
-        }
+
 
         if (savedInstanceState == null) {
             startMainFragment()

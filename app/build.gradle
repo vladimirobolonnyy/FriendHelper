@@ -16,7 +16,7 @@ android {
             shrinkResources false
         }
         release {
-            minifyEnabled true // breaks moshi DTO's resolve later
+            minifyEnabled true // breaks moshi DTO's. resolve later
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

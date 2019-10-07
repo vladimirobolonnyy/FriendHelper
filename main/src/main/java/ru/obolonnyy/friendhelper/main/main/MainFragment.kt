@@ -55,6 +55,7 @@ class MainFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel.lifecycleOwner = this
         viewModel.viewChannel().observe(this, Observer { render(it) })
     }
 

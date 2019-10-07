@@ -3,7 +3,6 @@ package ru.obolonnyy.friendhelper.main.main
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import ru.obolonnyy.friendhelper.utilsandroid.getColorCompat
 
@@ -48,16 +47,16 @@ class MainAdapter(
         file.isClickable = elem.fileProgressVisibility == View.GONE
         fileProgress.visibility = elem.fileProgressVisibility
 
-        downloadProgress.text = if (elem.downloadProgress == 0 && elem.downloadProgress == 100) "" else "${elem.downloadProgress}"
+        downloadProgress.text = if (elem.downloadProgress == null) "" else "${elem.downloadProgress}"
     }
 
     fun updateItems(newItems: List<StandState>) {
-        val diffResult = DiffUtil.calculateDiff(StructureDiffCallback(elements, newItems))
-        elements.clear()
-        elements.addAll(newItems)
-        diffResult.dispatchUpdatesTo(this)
+        if (elements.isEmpty()) {
+            elements.addAll(newItems)
+        }
+        notifyDataSetChanged()
     }
-
+/*
     class StructureDiffCallback(
         private val oldList: List<StandState>,
         private val newList: List<StandState>
@@ -73,5 +72,5 @@ class MainAdapter(
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
             oldList[oldItemPosition] == newList[newItemPosition]
-    }
+    }*/
 }

@@ -1,9 +1,9 @@
 package ru.obolonnyy.friendhelper.main.main
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import okio.BufferedSink
@@ -35,11 +35,9 @@ class MainModel(
     suspend fun getStandVersion(state: StandI): MyResult<String> {
         return try {
             val version = interactor.getVersion(state)
-            Timber.i("#### version:=${version}")
             MyResult.Success(version)
         } catch (ex: Exception) {
             Timber.e(ex)
-            Timber.i("#### ex:=${ex}")
             MyResult.Error(ex, Constants.ERROR + ex)
         }
     }
@@ -69,13 +67,16 @@ class MainModel(
         return res
     }
 
-    fun downloadFile(state: StandState, channel: Channel<Int>): MyResult<Any> {
+    fun downloadFile(state: StandState,channel: MutableLiveData<Int>): MyResult<Any> {
 
         return try {
-            val call = interactor.downloadApk(state.standI)
+            Timber.i("before call ")
+
+            val call: Call<ResponseBody> = interactor.downloadApk(state.standI)
             call.enqueue(object : Callback<ResponseBody> {
 
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    Timber.i("server onResponse")
                     if (response.isSuccessful) {
                         Timber.i("server contacted and has file")
 
@@ -133,7 +134,7 @@ class MainModel(
         }
     }
 
-    private fun writeResponseBodyToDisk(body: ResponseBody, state: StandState, channel: Channel<Int>): Boolean {
+    private fun writeResponseBodyToDisk(body: ResponseBody, state: StandState, channel: MutableLiveData<Int>): Boolean {
         try {
             val filePath = getApkPathFile(state)
             if (!filePath.exists()) {
@@ -144,7 +145,7 @@ class MainModel(
             var inputStream: InputStream? = null
             var outputStream: OutputStream? = null
             try {
-                val fileReader = ByteArray(4096)
+                val fileReader = ByteArray(8192)
                 val fileSize = body.contentLength()
                 var fileSizeDownloaded: Long = 0
                 inputStream = body.byteStream()
@@ -157,15 +158,14 @@ class MainModel(
                     }
                     outputStream.write(fileReader, 0, read)
                     fileSizeDownloaded += read.toLong()
-                    Timber.i("file download: $fileSizeDownloaded of $fileSize")
-                    channel.offer((fileSizeDownloaded * 100 / fileSize).toInt())
+                    channel.postValue((fileSizeDownloaded * 100 / fileSize).toInt())
                 }
                 outputStream.flush()
                 return true
             } catch (e: IOException) {
                 return false
             } finally {
-                viewModelScope.launch { channel.send(100) }
+                channel.postValue(100)
                 inputStream?.close()
                 outputStream?.close()
             }

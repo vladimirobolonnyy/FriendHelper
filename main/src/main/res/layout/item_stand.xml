@@ -116,7 +116,6 @@
         android:layout_height="wrap_content"
         android:textColor="@color/dark_blue"
         android:textSize="12sp"
-        android:layout_marginLeft="28dp"
         app:layout_constraintBottom_toBottomOf="@+id/download"
         app:layout_constraintEnd_toEndOf="@+id/download"
         app:layout_constraintStart_toStartOf="@+id/download"
