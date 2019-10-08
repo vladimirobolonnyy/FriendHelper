@@ -4,7 +4,7 @@ def versions = [
         room      : '2.1.0-alpha04',
         arch      : '2.2.0-alpha05',
 
-        koin      : '1.0.2',
+        koin      : '2.0.1',
 
         appcompat : '1.1.0',
         constraintlayout : '2.0.0-beta2',

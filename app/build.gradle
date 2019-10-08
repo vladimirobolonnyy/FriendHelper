@@ -48,7 +48,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$versions.timber"
 
     implementation "org.koin:koin-android:$versions.koin"
-    implementation "org.koin:koin-android-scope:$versions.koin"
+//    implementation "org.koin:koin-android-scope:$versions.koin"
     implementation "org.koin:koin-android-viewmodel:$versions.koin"
 
 

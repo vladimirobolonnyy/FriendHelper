@@ -27,8 +27,12 @@ import java.io.OutputStream
 
 class MainModel(
     val interactor: ApiInteractor,
-    val filesDir: File
+    val downloadsDir: File
 ) : ViewModel() {
+
+    init {
+        Timber.i("## downloadsDir:= $downloadsDir")
+    }
 
     private val getJustApkFileName = "friend.apk"
 
@@ -67,7 +71,7 @@ class MainModel(
         return res
     }
 
-    fun downloadFile(state: StandState,channel: MutableLiveData<Int>): MyResult<Any> {
+    fun downloadFile(state: StandState, channel: MutableLiveData<Int>): MyResult<Any> {
 
         return try {
             Timber.i("before call ")
@@ -107,7 +111,7 @@ class MainModel(
     }
 
     fun getApkFile(state: StandState): File {
-        return File(filesDir.toString() + getApkPath(state) + getJustApkFileName)
+        return File(downloadsDir.toString() + getApkPath(state) + getJustApkFileName)
     }
 
     private fun saveApkToFile(response: ResponseBody, state: StandState): Boolean {
@@ -176,7 +180,7 @@ class MainModel(
     }
 
     private fun getApkPathFile(state: StandState): File {
-        return File(filesDir.toString() + getApkPath(state) + "/")
+        return File(downloadsDir.toString() + getApkPath(state) + "/")
     }
 
     private fun getApkPath(state: StandState): String {

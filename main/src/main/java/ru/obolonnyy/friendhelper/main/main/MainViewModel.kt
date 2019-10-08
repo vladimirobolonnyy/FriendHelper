@@ -10,16 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
 
-class MainViewModel : ViewModel(), KoinComponent {
+class MainViewModel(val mainModel: MainModel, val elements: List<StandI>) : ViewModel() {
 
-    val mainModel: MainModel by inject()
-    val elements: List<StandI>  by inject()
+//    val mainModel: MainModel by inject()
+//    val elements: List<StandI>  by inject()
 
     lateinit var lifecycleOwner: LifecycleOwner
 

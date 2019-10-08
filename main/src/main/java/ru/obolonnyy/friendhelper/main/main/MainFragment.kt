@@ -11,19 +11,21 @@ import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.koin.android.ext.android.inject
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.qualifier.named
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
 import java.io.File
 
 class MainFragment : Fragment() {
 
-    lateinit var viewModel: MainViewModel
-    val provider: String by inject(PROVIDER)
+    val mainViewModel: MainViewModel by viewModel()
+
+    val provider: String by inject(named(PROVIDER))
 
     private lateinit var recycler: RecyclerView
     private lateinit var adapter: MainAdapter
@@ -54,10 +56,9 @@ class MainFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        viewModel.lifecycleOwner = this
-        viewModel.viewChannel().observe(this, Observer { render(it) })
-        viewModel.viewEvents().observe(this, Observer { renderEvents(it) })
+        mainViewModel.lifecycleOwner = this
+        mainViewModel.viewChannel().observe(this, Observer { render(it) })
+        mainViewModel.viewEvents().observe(this, Observer { renderEvents(it) })
     }
 
     private fun renderEvents(event: Event<MainViewEvent>) {
@@ -76,13 +77,13 @@ class MainFragment : Fragment() {
 
     private fun refreshItems() {
         swipe.isRefreshing = false
-        viewModel.refresh()
+        mainViewModel.refresh()
     }
 
     private fun createAdapter() = MainAdapter(
-        onVersionClicked = viewModel::onVersionClicked,
-        onStatusClicked = viewModel::onStatusClicked,
-        onFileClicked = viewModel::onFileClicked
+        onVersionClicked = mainViewModel::onVersionClicked,
+        onStatusClicked = mainViewModel::onStatusClicked,
+        onFileClicked = mainViewModel::onFileClicked
     )
 
     private fun openFolder(file: File) {
