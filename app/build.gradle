@@ -16,7 +16,7 @@ android {
             shrinkResources false
         }
         release {
-            minifyEnabled true // breaks moshi DTO's. resolve later
+            minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -35,7 +35,6 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
-    implementation "com.google.android.material:material:$versions.material"
     implementation "androidx.multidex:multidex:$versions.multidex"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"

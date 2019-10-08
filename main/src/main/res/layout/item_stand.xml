@@ -79,7 +79,7 @@
         app:layout_constraintEnd_toEndOf="@+id/version"
         app:layout_constraintStart_toStartOf="@+id/version"
         app:layout_constraintTop_toTopOf="@+id/version"
-        app:mpb_indeterminateTint="@color/dark_blue"
+        app:color="@color/dark_blue"
         tools:visibility="visible" />
 
     <ProgressBar
@@ -93,7 +93,7 @@
         app:layout_constraintEnd_toEndOf="@+id/status"
         app:layout_constraintStart_toStartOf="@+id/status"
         app:layout_constraintTop_toTopOf="@+id/status"
-        app:mpb_indeterminateTint="@color/dark_blue"
+        app:color="@color/dark_blue"
         tools:visibility="visible" />
 
     <TextView

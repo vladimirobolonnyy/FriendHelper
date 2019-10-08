@@ -19,7 +19,6 @@ dependencies {
 
     implementation "androidx.recyclerview:recyclerview:$versions.recyclerview"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swiperefreshlayout"
-    implementation "me.zhanghai.android.materialprogressbar:library:$versions.materialprogressbar"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines"
