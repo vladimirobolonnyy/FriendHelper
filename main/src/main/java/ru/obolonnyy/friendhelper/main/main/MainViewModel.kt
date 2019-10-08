@@ -14,10 +14,7 @@ import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
 
-class MainViewModel(val mainModel: MainModel, val elements: List<StandI>) : ViewModel() {
-
-//    val mainModel: MainModel by inject()
-//    val elements: List<StandI>  by inject()
+class MainViewModel(private val mainModel: MainModel, elements: List<StandI>) : ViewModel() {
 
     lateinit var lifecycleOwner: LifecycleOwner
 
@@ -40,9 +37,10 @@ class MainViewModel(val mainModel: MainModel, val elements: List<StandI>) : View
     }
 
     fun refresh() {
-        viewState.items?.forEach {
-            onVersionClicked(it)
-            onStatusClicked(it)
+        viewState.items?.forEach { stand ->
+            onFileStatusRefreshed(stand)
+            onVersionClicked(stand)
+            onStatusClicked(stand)
         }
     }
 
@@ -56,11 +54,11 @@ class MainViewModel(val mainModel: MainModel, val elements: List<StandI>) : View
             when (result) {
                 is MyResult.Success -> {
                     viewState.items?.get(pos)!!.version = result.data
-                    if (viewState.items?.get(pos)!!.fileStatus != FileStatus.Loading(0)) {
+                    if ((viewState.items?.get(pos)!!.fileStatus is FileStatus.Loading).not()) {
                         viewState.items?.get(pos)!!.fileVisibility = View.VISIBLE
                     }
                 }
-                is MyResult.Error -> viewState.items?.get(pos)!!.version = result.message
+                is MyResult.Error -> viewState.items?.get(pos)!!.version = result.stringResult
             }
             viewState.items?.get(pos)!!.versionProgressVisibility = View.GONE
             if (mainModel.fileExists(state)) {
@@ -83,7 +81,7 @@ class MainViewModel(val mainModel: MainModel, val elements: List<StandI>) : View
                     viewState.items?.get(pos)!!.statusColor = R.color.green
                 }
                 is MyResult.Error -> {
-                    viewState.items?.get(pos)!!.status = result.message
+                    viewState.items?.get(pos)!!.status = result.stringResult
                     viewState.items?.get(pos)!!.statusColor = R.color.red
                 }
             }
@@ -104,17 +102,26 @@ class MainViewModel(val mainModel: MainModel, val elements: List<StandI>) : View
         }
     }
 
+    private fun onFileStatusRefreshed(standState: StandState) {
+        val pos = standState.position
+        if (mainModel.fileExists(standState)) {
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.Loaded)
+        } else {
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.NotLoaded)
+        }
+    }
+
     private fun downloadFile(state: StandState) {
         GlobalScope.launch(Dispatchers.IO) {
             val pos = state.position
             viewState.items?.get(pos)!!.changeFileState(FileStatus.Loading(0))
             _viewChannel.postValue(viewState)
-            val channel = MutableLiveData<Int>()
-            val result = mainModel.downloadFile(state, channel)
+            val result = mainModel.downloadFile(state)
             when (result) {
                 is MyResult.Success -> {
+                    val liveData = result.data
                     withContext(Dispatchers.Main) {
-                        channel.observe(lifecycleOwner, Observer {
+                        liveData.observe(lifecycleOwner, Observer {
                             if (it <= 99) {
                                 viewState.items?.get(pos)!!.changeFileState(FileStatus.Loading(it))
                                 _viewChannel.postValue(viewState)
