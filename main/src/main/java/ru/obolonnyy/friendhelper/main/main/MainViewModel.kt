@@ -27,6 +27,9 @@ class MainViewModel : ViewModel(), KoinComponent {
     fun viewChannel() = _viewChannel
     private var viewState = MainViewState()
 
+    private val _viewEvents = MutableLiveData<Event<MainViewEvent>>()
+    fun viewEvents() = _viewEvents
+
     init {
         val elementsState = mutableListOf<StandState>()
         elements.forEachIndexed { index, standI ->
@@ -45,49 +48,51 @@ class MainViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    fun onVersionClicked(state: StandState) {viewModelScope.launch {
-        val pos = state.position
-        viewState.file = null
-        viewState.items?.get(pos)!!.versionProgressVisibility = View.VISIBLE
-        viewState.items?.get(pos)!!.version = ""
-        _viewChannel.postValue(viewState)
-        val result = mainModel.getStandVersion(state.standI)
-        when (result) {
-            is MyResult.Success -> {
-                viewState.items?.get(pos)!!.version = result.data
-                if (viewState.items?.get(pos)!!.fileStatus != FileStatus.Loading(0)) {
-                    viewState.items?.get(pos)!!.fileVisibility = View.VISIBLE
+    fun onVersionClicked(state: StandState) {
+        viewModelScope.launch {
+            val pos = state.position
+            viewState.items?.get(pos)!!.versionProgressVisibility = View.VISIBLE
+            viewState.items?.get(pos)!!.version = ""
+            _viewChannel.postValue(viewState)
+            val result = mainModel.getStandVersion(state.standI)
+            when (result) {
+                is MyResult.Success -> {
+                    viewState.items?.get(pos)!!.version = result.data
+                    if (viewState.items?.get(pos)!!.fileStatus != FileStatus.Loading(0)) {
+                        viewState.items?.get(pos)!!.fileVisibility = View.VISIBLE
+                    }
+                }
+                is MyResult.Error -> viewState.items?.get(pos)!!.version = result.message
+            }
+            viewState.items?.get(pos)!!.versionProgressVisibility = View.GONE
+            if (mainModel.fileExists(state)) {
+                state.changeFileState(FileStatus.Loaded)
+            }
+            _viewChannel.postValue(viewState)
+        }
+    }
+
+    fun onStatusClicked(state: StandState) {
+        viewModelScope.launch {
+            val pos = state.position
+            viewState.items?.get(pos)!!.statusProgressVisibility = View.VISIBLE
+            viewState.items?.get(pos)!!.status = ""
+            _viewChannel.postValue(viewState)
+            val result = mainModel.getStandStatus(state.standI)
+            when (result) {
+                is MyResult.Success -> {
+                    viewState.items?.get(pos)!!.status = result.data
+                    viewState.items?.get(pos)!!.statusColor = R.color.green
+                }
+                is MyResult.Error -> {
+                    viewState.items?.get(pos)!!.status = result.message
+                    viewState.items?.get(pos)!!.statusColor = R.color.red
                 }
             }
-            is MyResult.Error -> viewState.items?.get(pos)!!.version = result.message
+            viewState.items?.get(pos)!!.statusProgressVisibility = View.GONE
+            _viewChannel.postValue(viewState)
         }
-        viewState.items?.get(pos)!!.versionProgressVisibility = View.GONE
-        if (mainModel.fileExists(state)) {
-            state.changeFileState(FileStatus.Loaded)
-        }
-        _viewChannel.postValue(viewState)
-    }}
-
-    fun onStatusClicked(state: StandState) { viewModelScope.launch {
-        val pos = state.position
-        viewState.file = null
-        viewState.items?.get(pos)!!.statusProgressVisibility = View.VISIBLE
-        viewState.items?.get(pos)!!.status = ""
-        _viewChannel.postValue(viewState)
-        val result = mainModel.getStandStatus(state.standI)
-        when (result) {
-            is MyResult.Success -> {
-                viewState.items?.get(pos)!!.status = result.data
-                viewState.items?.get(pos)!!.statusColor = R.color.green
-            }
-            is MyResult.Error -> {
-                viewState.items?.get(pos)!!.status = result.message
-                viewState.items?.get(pos)!!.statusColor = R.color.red
-            }
-        }
-        viewState.items?.get(pos)!!.statusProgressVisibility = View.GONE
-        _viewChannel.postValue(viewState)
-    }}
+    }
 
     fun onFileClicked(state: StandState) {
         when (state.fileStatus) {
@@ -95,8 +100,7 @@ class MainViewModel : ViewModel(), KoinComponent {
             is FileStatus.Loading -> { /* no need to do anything*/
             }
             FileStatus.Loaded -> {
-                viewState = viewState.copy(file = mainModel.getApkFile(state))
-                _viewChannel.postValue(viewState)
+                _viewEvents.postValue(Event(MainViewEvent.OpenFile(mainModel.getApkFile(state))))
             }
             FileStatus.Error -> downloadFile(state)
         }

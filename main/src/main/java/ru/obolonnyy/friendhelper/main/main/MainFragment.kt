@@ -57,12 +57,20 @@ class MainFragment : Fragment() {
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.lifecycleOwner = this
         viewModel.viewChannel().observe(this, Observer { render(it) })
+        viewModel.viewEvents().observe(this, Observer { renderEvents(it) })
+    }
+
+    private fun renderEvents(event: Event<MainViewEvent>) {
+        when (val content = event.getContentIfNotHandled()) {
+            is MainViewEvent.OpenFile -> openFolder(content.file)
+            else -> {/*nothing*/
+            }
+        }
     }
 
     private fun render(state: MainViewState) {
         with(state) {
             items?.let { adapter.updateItems(it) }
-            file?.let { openFolder(it) }
         }
     }
 

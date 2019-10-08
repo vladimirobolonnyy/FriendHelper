@@ -29,6 +29,9 @@ data class StandState(
 
     var fileStatus: FileStatus = FileStatus.NotLoaded
 
+    val fileIsClickable: Boolean
+        get() = (fileStatus is FileStatus.Loading).not()
+
     fun changeFileState(status: FileStatus) {
         fileStatus = status
         when (fileStatus) {

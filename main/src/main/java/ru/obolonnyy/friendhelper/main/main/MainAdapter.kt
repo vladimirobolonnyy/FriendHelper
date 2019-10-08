@@ -44,8 +44,7 @@ class MainAdapter(
         file.visibility = elem.fileVisibility
         file.setImageResource(elem.fileImageResource)
         file.setOnClickListener { onFileClicked(elem) }
-        file.isClickable = elem.fileProgressVisibility == View.GONE
-        fileProgress.visibility = elem.fileProgressVisibility
+        file.isClickable = elem.fileIsClickable
 
         downloadProgress.text = if (elem.downloadProgress == null) "" else "${elem.downloadProgress}"
     }
