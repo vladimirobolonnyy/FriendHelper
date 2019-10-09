@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
+import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -17,6 +18,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.qualifier.named
+import ru.obolonnyy.friendhelper.main.BuildConfig
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
 import java.io.File
@@ -53,6 +55,8 @@ class MainFragment : Fragment() {
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
         swipe.setOnRefreshListener { refreshItems() }
+        view.findViewById<TextView>(R.id.version).text = "Version: ${BuildConfig.APP_VERSION}"
+
     }
 
     private fun observeViewModel() {
