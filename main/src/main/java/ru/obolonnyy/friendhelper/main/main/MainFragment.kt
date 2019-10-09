@@ -8,30 +8,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
+import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.qualifier.named
+import ru.obolonnyy.friendhelper.main.BuildConfig
 import ru.obolonnyy.friendhelper.main.R
-import ru.obolonnyy.friendhelper.main.second.SecondFragment
-import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.CONTAINER
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
-import ru.obolonnyy.friendhelper.utilsandroid.ScopedFragment
 import java.io.File
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
-class MainFragment : ScopedFragment() {
+class MainFragment : Fragment() {
 
-    val viewModel: MainViewModel by inject()
-    val container: Int by inject(CONTAINER)
-    val provider: String by inject(PROVIDER)
+    val mainViewModel: MainViewModel by viewModel()
+
+    val provider: String by inject(named(PROVIDER))
 
     private lateinit var recycler: RecyclerView
     private lateinit var adapter: MainAdapter
@@ -47,8 +43,8 @@ class MainFragment : ScopedFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews(view)
         observeViewModel()
+        initViews(view)
     }
 
     private fun initViews(view: View) {
@@ -59,48 +55,39 @@ class MainFragment : ScopedFragment() {
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
         swipe.setOnRefreshListener { refreshItems() }
- /*       view.findViewById<View>(R.id.second).setOnClickListener {
-            navigateToSecondFragment()
-        }*/
-    }
+        view.findViewById<TextView>(R.id.version).text = "Version: ${BuildConfig.APP_VERSION}"
 
-    private fun navigateToSecondFragment() {
-        navigate(SecondFragment.newInstance())
-    }
-
-    private fun navigate(fragment: Fragment) {
-        val tag = fragment.javaClass.simpleName
-        val transaction = fragmentManager!!.beginTransaction()
-            .setCustomAnimations(
-                R.animator.fade_in, R.animator.fade_out,
-                R.animator.fade_in, R.animator.fade_out
-            )
-            .add(container, fragment, tag)
-        transaction.addToBackStack(tag)
-        transaction.commit()
     }
 
     private fun observeViewModel() {
-        launch { viewModel.viewChannel.consumeEach(::render) }
+        mainViewModel.lifecycleOwner = this
+        mainViewModel.viewChannel().observe(this, Observer { render(it) })
+        mainViewModel.viewEvents().observe(this, Observer { renderEvents(it) })
+    }
+
+    private fun renderEvents(event: Event<MainViewEvent>) {
+        when (val content = event.getContentIfNotHandled()) {
+            is MainViewEvent.OpenFile -> openFolder(content.file)
+            else -> {/*nothing*/
+            }
+        }
     }
 
     private fun render(state: MainViewState) {
         with(state) {
             items?.let { adapter.updateItems(it) }
-            file?.let { openFolder(it) }
         }
     }
 
     private fun refreshItems() {
         swipe.isRefreshing = false
-        viewModel.refresh()
+        mainViewModel.refresh()
     }
 
     private fun createAdapter() = MainAdapter(
-        elements = mutableListOf(),
-        onVersionClicked = viewModel::onVersionClicked,
-        onStatusClicked = viewModel::onStatusClicked,
-        onFileClicked = viewModel::onFileClicked
+        onVersionClicked = mainViewModel::onVersionClicked,
+        onStatusClicked = mainViewModel::onStatusClicked,
+        onFileClicked = mainViewModel::onFileClicked
     )
 
     private fun openFolder(file: File) {

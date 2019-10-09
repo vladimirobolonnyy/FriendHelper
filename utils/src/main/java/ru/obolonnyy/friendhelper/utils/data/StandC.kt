@@ -13,17 +13,3 @@ data class StandC(
     override val engName: String,
     override val context: String
 ) : StandI
-
-interface StandEntityInt {
-    val timeStamp: String
-    val stringName: String
-    val version: String?
-    val status: String?
-}
-
-data class StandEntity(
-    override val timeStamp: String,
-    override val stringName: String,
-    override val version: String?,
-    override val status: String?
-) : StandEntityInt

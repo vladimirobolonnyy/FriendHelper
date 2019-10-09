@@ -4,11 +4,11 @@ import android.view.View
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.StandI
 
-enum class FileStatus {
-    NOT_LOADED,
-    LOADING,
-    LOADED,
-    ERROR
+sealed class FileStatus {
+    object NotLoaded : FileStatus()
+    data class Loading(val process: Int) : FileStatus()
+    object Loaded : FileStatus()
+    object Error : FileStatus()
 }
 
 data class StandState(
@@ -23,32 +23,40 @@ data class StandState(
 
     var fileImageResource: Int = R.drawable.ic_download,
     var fileProgressVisibility: Int = View.GONE,
-    var fileVisibility: Int = View.GONE
+    var fileVisibility: Int = View.GONE,
+    var downloadProgress: Int? = 0
 ) {
 
-    var fileStatus: FileStatus = FileStatus.NOT_LOADED
+    var fileStatus: FileStatus = FileStatus.NotLoaded
+
+    val fileIsClickable: Boolean
+        get() = (fileStatus is FileStatus.Loading).not()
 
     fun changeFileState(status: FileStatus) {
         fileStatus = status
         when (fileStatus) {
-            FileStatus.NOT_LOADED -> {
+            FileStatus.NotLoaded -> {
                 fileVisibility = View.VISIBLE
                 fileImageResource = R.drawable.ic_download
                 fileProgressVisibility = View.GONE
+                downloadProgress = null
             }
-            FileStatus.LOADING -> {
+            is FileStatus.Loading -> {
                 fileVisibility = View.INVISIBLE
                 fileProgressVisibility = View.VISIBLE
+                downloadProgress = (status as FileStatus.Loading).process
             }
-            FileStatus.LOADED -> {
+            FileStatus.Loaded -> {
                 fileVisibility = View.VISIBLE
                 fileImageResource = R.drawable.ic_downloaded
                 fileProgressVisibility = View.GONE
+                downloadProgress = null
             }
-            FileStatus.ERROR -> {
+            FileStatus.Error -> {
                 fileVisibility = View.VISIBLE
                 fileImageResource = R.drawable.ic_error
                 fileProgressVisibility = View.GONE
+                downloadProgress = null
             }
         }
     }

@@ -11,11 +11,14 @@ android {
         multiDexEnabled true
     }
     buildTypes {
-        debug{
-//            minifyEnabled true
-//            shrinkResources true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
+        debug {
+            minifyEnabled false
+            shrinkResources false
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -25,15 +28,13 @@ dependencies {
     implementation project(":api")
     implementation project(":utils")
     implementation project(":utils-android")
-    implementation project(":database")
     implementation project(":network")
     implementation project(":main")
 
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
-    implementation "com.google.android.material:material:$versions.material"
     implementation "androidx.multidex:multidex:$versions.multidex"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"
@@ -47,17 +48,8 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$versions.timber"
 
     implementation "org.koin:koin-android:$versions.koin"
-    implementation "org.koin:koin-android-scope:$versions.koin"
+//    implementation "org.koin:koin-android-scope:$versions.koin"
     implementation "org.koin:koin-android-viewmodel:$versions.koin"
 
-    implementation "androidx.room:room-runtime:$versions.room"
-    implementation "androidx.room:room-coroutines:$versions.room"
-    kapt "androidx.room:room-compiler:$versions.room"
 
-    implementation "com.sothree.slidinguppanel:library:$versions.slidinguppanel"
-
-//    return when will need
-//    testImplementation versions.junit
-//    androidTestImplementation versions.runner
-//    androidTestImplementation versions.espresso
 }

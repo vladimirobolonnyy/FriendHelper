@@ -8,11 +8,12 @@ import ru.obolonnyy.friendhelper.utilsandroid.getColorCompat
 
 
 class MainAdapter(
-    private var elements: MutableList<StandState>,
     val onVersionClicked: (StandState) -> (Unit),
     val onStatusClicked: (StandState) -> (Unit),
     val onFileClicked: (StandState) -> (Unit)
 ) : Adapter<MainViewHolder>() {
+
+    private var elements: MutableList<StandState> = mutableListOf()
 
     override fun getItemCount() = elements.size
 
@@ -43,16 +44,32 @@ class MainAdapter(
         file.visibility = elem.fileVisibility
         file.setImageResource(elem.fileImageResource)
         file.setOnClickListener { onFileClicked(elem) }
-        file.isClickable = elem.fileProgressVisibility == View.GONE
-        fileProgress.visibility = elem.fileProgressVisibility
+        file.isClickable = elem.fileIsClickable
+
+        downloadProgress.text = if (elem.downloadProgress == null) "" else "${elem.downloadProgress}"
     }
 
     fun updateItems(newItems: List<StandState>) {
-        // Here DiffUtilCallback doesn't work, because we always working with the same elements (objects).
-        // ViewModel change their states and DiffUtilCallback can't find the difference.
-        if (elements.isNullOrEmpty()){
+        if (elements.isEmpty()) {
             elements.addAll(newItems)
         }
         notifyDataSetChanged()
     }
+/*
+    class StructureDiffCallback(
+        private val oldList: List<StandState>,
+        private val newList: List<StandState>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return true // because we have the same element all the time
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+            oldList[oldItemPosition] == newList[newItemPosition]
+    }*/
 }

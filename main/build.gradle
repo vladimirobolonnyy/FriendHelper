@@ -12,14 +12,13 @@ dependencies {
     implementation project(":utils")
     implementation project(":utils-android")
 
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
 
     implementation "androidx.recyclerview:recyclerview:$versions.recyclerview"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swiperefreshlayout"
-    implementation "me.zhanghai.android.materialprogressbar:library:$versions.materialprogressbar"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines"
@@ -30,6 +29,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
 
     implementation "org.koin:koin-android:$versions.koin"
-    implementation "org.koin:koin-android-scope:$versions.koin"
+//    implementation "org.koin:koin-android-scope:$versions.koin"
     implementation "org.koin:koin-android-viewmodel:$versions.koin"
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.arch}"
+    implementation "androidx.lifecycle:lifecycle-extensions:${versions.arch}"
 }

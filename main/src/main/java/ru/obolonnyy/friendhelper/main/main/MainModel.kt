@@ -1,119 +1,148 @@
 package ru.obolonnyy.friendhelper.main.main
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
-import okio.BufferedSink
-import okio.Okio
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
-import ru.obolonnyy.friendhelper.api.interfaces.ApiInteractorInterface
+import ru.obolonnyy.friendhelper.api.ApiInteractor
 import ru.obolonnyy.friendhelper.utils.constants.Constants
 import ru.obolonnyy.friendhelper.utils.constants.Constants.DATAPOWER
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
-import ru.obolonnyy.friendhelper.utils.database.StandRepository
 import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.coroutines.CoroutineContext
+import java.io.InputStream
+import java.io.OutputStream
+
 
 class MainModel(
-    val interactor: ApiInteractorInterface,
-    val filesDir: File,
-    val repository: StandRepository
-) : CoroutineScope {
+    val interactor: ApiInteractor,
+    val downloadsDir: File
+) : ViewModel() {
 
-    private var job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    init {
+        Timber.i("## downloadsDir:= $downloadsDir")
+    }
 
     private val getJustApkFileName = "friend.apk"
 
     suspend fun getStandVersion(state: StandI): MyResult<String> {
         return try {
-            val response = interactor.getVersion(state)
-            val version = response.version!!
-            withContext(IO) { repository.saveVersion(state, version) }
+            val version = interactor.getVersion(state)
             MyResult.Success(version)
         } catch (ex: Exception) {
             Timber.e(ex)
-            MyResult.Error(ex, Constants.ERROR)
+            MyResult.Error(message = Constants.ERROR)
         }
     }
 
     suspend fun getStandStatus(stand: StandI): MyResult<String> {
-        val res = try {
+        return try {
             interactor.sendEmailTemporaryCode(stand)
             MyResult.Success(Constants.ONLINE)
-        } catch (ex: Exception) {
-            Timber.e(ex)
-            when (ex) {
-                is HttpException -> {
-                    val errorMessage = ex.response()?.errorBody()?.string()
-                    when {
-                        errorMessage?.contains("ERROR_ID_NOTFOUND") == true -> MyResult.Success(Constants.ONLINE)
-                        errorMessage?.contains("<!DOCTYPE html>") == true -> MyResult.Error(
-                            ex,
-                            Constants.SERVER_REINSTALLING
-                        )
-                        errorMessage?.contains(DATAPOWER) == true -> MyResult.Error(ex, Constants.DATA_POWER_ERROR)
-                        else -> MyResult.Error(ex, Constants.SERVER_ERROR + " ${ex.code()}")
-                    }
-                }
-                else -> MyResult.Error(ex, Constants.NOT_HTTP_ERROR)
+        } catch (ex: HttpException) {
+            val errorMessage = ex.response()?.errorBody()?.string()!!
+            when {
+                errorMessage.contains("ERROR_ID_NOTFOUND") -> MyResult.Success(Constants.ONLINE)
+                errorMessage.contains("<!DOCTYPE html>") -> MyResult.Error(message = Constants.SERVER_REINSTALLING)
+                errorMessage.contains(DATAPOWER) -> MyResult.Error(message = Constants.DATA_POWER_ERROR)
+                else -> MyResult.Error(message = Constants.SERVER_ERROR + " ${ex.code()}")
             }
+        } catch (ex: Exception) {
+            MyResult.Error(message = Constants.NOT_HTTP_ERROR)
         }
-        withContext(IO) { repository.saveStatus(stand, res.stringResult()) }
-        return res
     }
 
-    suspend fun downloadFile(state: StandState): MyResult<Any> {
+    fun downloadFile(state: StandState): MyResult<LiveData<Int>> {
         return try {
-            val response = interactor.downloadApk(state.standI)
-            saveApkToFile(response, state)
-            MyResult.Success("")
+            val liveData = MutableLiveData<Int>()
+            val call: Call<ResponseBody> = interactor.downloadApk(state.standI)
+            call.enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    if (response.isSuccessful) {
+                        viewModelScope.launch(IO) {
+                            Timber.i("server contacted and has file")
+                            val writtenToDisk = writeResponseBodyToDisk(response.body()!!, state, liveData)
+                            Timber.i("file download was a success? $writtenToDisk")
+                        }
+
+                    } else {
+                        Timber.i("server contact failed")
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Timber.e(t)
+                }
+            })
+            MyResult.Success(liveData)
         } catch (ex: Exception) {
             Timber.e(ex)
-            MyResult.Error(ex, ex.localizedMessage)
+            MyResult.Error(ex)
         }
     }
+
 
     fun fileExists(state: StandState): Boolean {
         return getApkFile(state).exists()
     }
 
     fun getApkFile(state: StandState): File {
-        return File(filesDir.toString() + getApkPath(state) + getJustApkFileName)
+        return File(downloadsDir.toString() + getApkPath(state) + getJustApkFileName)
     }
 
-    private fun saveApkToFile(response: Response<ResponseBody>, state: StandState) {
-        val filePath = getApkPathFile(state)
-        var sink: BufferedSink? = null
+    private fun writeResponseBodyToDisk(body: ResponseBody, state: StandState, liveData: MutableLiveData<Int>): Boolean {
         try {
+            val filePath = getApkPathFile(state)
             if (!filePath.exists()) {
                 filePath.mkdirs()
             }
             val file = File("$filePath/$getJustApkFileName")
             file.createNewFile()
-            sink = Okio.buffer(Okio.sink(file))
-            sink.writeAll(response.body()!!.source())
-        } catch (ex: Exception) {
-            Timber.e(ex, "sink writing error")
-        } finally {
+            var inputStream: InputStream? = null
+            var outputStream: OutputStream? = null
             try {
-                sink?.close()
-            } catch (ex: IOException) {
-                Timber.e(ex, "sink closing error")
+                val fileReader = ByteArray(8192)
+                val fileSize = body.contentLength()
+                var fileSizeDownloaded: Long = 0
+                inputStream = body.byteStream()
+                outputStream = FileOutputStream(file)
+                while (true) {
+                    val read = inputStream!!.read(fileReader)
+                    Timber.i("readed ${fileReader.size}")
+                    if (read == -1) {
+                        break
+                    }
+                    outputStream.write(fileReader, 0, read)
+                    fileSizeDownloaded += read.toLong()
+                    liveData.postValue((fileSizeDownloaded * 100 / fileSize).toInt())
+                }
+                outputStream.flush()
+                return true
+            } catch (e: IOException) {
+                return false
+            } finally {
+                liveData.postValue(100)
+                inputStream?.close()
+                outputStream?.close()
             }
+        } catch (e: IOException) {
+            return false
         }
+
     }
 
     private fun getApkPathFile(state: StandState): File {
-        return File(filesDir.toString() + getApkPath(state) + "/")
+        return File(downloadsDir.toString() + getApkPath(state) + "/")
     }
 
     private fun getApkPath(state: StandState): String {

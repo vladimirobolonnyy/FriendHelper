@@ -1,14 +1,22 @@
 package ru.obolonnyy.friendhelper.utils.data
 
-sealed class MyResult<out T : Any> {
+sealed class MyResult<out T> {
 
-    abstract fun stringResult() : String
+    abstract val stringResult: String
 
-    class Success<T : Any>(val data: T) : MyResult<T>() {
-        override fun stringResult() = data.toString()
+    class Success<T>(val data: T) : MyResult<T>() {
+        override val stringResult = data.toString()
     }
 
-    class Error(val exception: Exception, val message: String) : MyResult<Nothing>() {
-        override fun stringResult() = message
+    class Error(exception: Exception?= null, message: String? = null) : MyResult<Nothing>() {
+        override val stringResult = message ?: exception?.message ?: exception?.localizedMessage ?: "empty message"
+    }
+}
+
+inline fun <T> asResult(block: () -> T): MyResult<T> {
+    return try {
+        MyResult.Success(block())
+    } catch (ex: Exception) {
+        MyResult.Error(ex)
     }
 }

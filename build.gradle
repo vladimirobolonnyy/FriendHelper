@@ -1,5 +1,5 @@
 apply from: 'deps.gradle'
-apply plugin: 'com.gradle.build-scan'
+//apply plugin: 'com.gradle.build-scan'
 
 buildscript {
     apply from: 'deps.gradle'
@@ -11,7 +11,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-        classpath 'com.gradle:build-scan-plugin:1.16'
+//        classpath 'com.gradle:build-scan-plugin:1.16'
     }
 }
 
@@ -28,7 +28,7 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
-}
+//buildScan {
+//    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+//    termsOfServiceAgree = 'yes'
+//}

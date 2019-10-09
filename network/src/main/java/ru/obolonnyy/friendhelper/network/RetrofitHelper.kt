@@ -20,14 +20,18 @@ import javax.net.ssl.X509TrustManager
 
 object RetrofitHelper {
 
+    /*
+    * Be aware, when HttpLoggingInterceptor.Level.BODY, Retrofit streaming doesn't works.
+    * */
+    private val loggingLevel = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS else HttpLoggingInterceptor.Level.NONE
+
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
             .initTls()
-            .connectTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
-            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .addInterceptor(ShortTimberLoggingInterceptor())
+            .addInterceptor(HttpLoggingInterceptor().setLevel(loggingLevel))
             .build()
     }
 

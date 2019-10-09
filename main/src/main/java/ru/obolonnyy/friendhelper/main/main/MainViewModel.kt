@@ -1,30 +1,29 @@
 package ru.obolonnyy.friendhelper.main.main
 
 import android.view.View
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.utils.data.StandI
-import kotlin.coroutines.CoroutineContext
 
-@ExperimentalCoroutinesApi
-class MainViewModel(
-    private val mainModel: MainModel,
-    elements: List<StandI>
-) : CoroutineScope {
+class MainViewModel(private val mainModel: MainModel, elements: List<StandI>) : ViewModel() {
 
-    private var job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    lateinit var lifecycleOwner: LifecycleOwner
 
-    val viewChannel = ConflatedBroadcastChannel<MainViewState>()
+    private val _viewChannel = MutableLiveData<MainViewState>()
+    fun viewChannel() = _viewChannel
     private var viewState = MainViewState()
+
+    private val _viewEvents = MutableLiveData<Event<MainViewEvent>>()
+    fun viewEvents() = _viewEvents
 
     init {
         val elementsState = mutableListOf<StandState>()
@@ -33,49 +32,48 @@ class MainViewModel(
             elementsState.add(state)
         }
         viewState = MainViewState(items = elementsState)
-        viewChannel.offer(viewState)
+        _viewChannel.postValue(viewState)
         refresh()
     }
 
     fun refresh() {
-        viewState.items?.forEach {
-            onVersionClicked(it)
-            onStatusClicked(it)
+        viewState.items?.forEach { stand ->
+            onFileStatusRefreshed(stand)
+            onVersionClicked(stand)
+            onStatusClicked(stand)
         }
     }
 
     fun onVersionClicked(state: StandState) {
-        launch {
+        viewModelScope.launch {
             val pos = state.position
-            viewState.file = null
             viewState.items?.get(pos)!!.versionProgressVisibility = View.VISIBLE
             viewState.items?.get(pos)!!.version = ""
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
             val result = mainModel.getStandVersion(state.standI)
             when (result) {
                 is MyResult.Success -> {
                     viewState.items?.get(pos)!!.version = result.data
-                    if (viewState.items?.get(pos)!!.fileStatus != FileStatus.LOADING) {
+                    if ((viewState.items?.get(pos)!!.fileStatus is FileStatus.Loading).not()) {
                         viewState.items?.get(pos)!!.fileVisibility = View.VISIBLE
                     }
                 }
-                is MyResult.Error -> viewState.items?.get(pos)!!.version = result.message
+                is MyResult.Error -> viewState.items?.get(pos)!!.version = result.stringResult
             }
             viewState.items?.get(pos)!!.versionProgressVisibility = View.GONE
             if (mainModel.fileExists(state)) {
-                state.changeFileState(FileStatus.LOADED)
+                state.changeFileState(FileStatus.Loaded)
             }
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
         }
     }
 
     fun onStatusClicked(state: StandState) {
-        launch {
+        viewModelScope.launch {
             val pos = state.position
-            viewState.file = null
             viewState.items?.get(pos)!!.statusProgressVisibility = View.VISIBLE
             viewState.items?.get(pos)!!.status = ""
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
             val result = mainModel.getStandStatus(state.standI)
             when (result) {
                 is MyResult.Success -> {
@@ -83,39 +81,62 @@ class MainViewModel(
                     viewState.items?.get(pos)!!.statusColor = R.color.green
                 }
                 is MyResult.Error -> {
-                    viewState.items?.get(pos)!!.status = result.message
+                    viewState.items?.get(pos)!!.status = result.stringResult
                     viewState.items?.get(pos)!!.statusColor = R.color.red
                 }
             }
             viewState.items?.get(pos)!!.statusProgressVisibility = View.GONE
-            viewChannel.offer(viewState)
+            _viewChannel.postValue(viewState)
         }
     }
 
     fun onFileClicked(state: StandState) {
         when (state.fileStatus) {
-            FileStatus.NOT_LOADED -> downloadFile(state)
-            FileStatus.LOADING -> { /* no need to do anything*/
+            FileStatus.NotLoaded -> downloadFile(state)
+            is FileStatus.Loading -> { /* no need to do anything*/
             }
-            FileStatus.LOADED -> {
-                viewState = viewState.copy(file = mainModel.getApkFile(state))
-                viewChannel.offer(viewState)
+            FileStatus.Loaded -> {
+                _viewEvents.postValue(Event(MainViewEvent.OpenFile(mainModel.getApkFile(state))))
             }
-            FileStatus.ERROR -> downloadFile(state)
+            FileStatus.Error -> downloadFile(state)
+        }
+    }
+
+    private fun onFileStatusRefreshed(standState: StandState) {
+        val pos = standState.position
+        if (mainModel.fileExists(standState)) {
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.Loaded)
+        } else {
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.NotLoaded)
         }
     }
 
     private fun downloadFile(state: StandState) {
-        GlobalScope.launch (Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO) {
             val pos = state.position
-            viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADING)
-            viewChannel.offer(viewState)
+            viewState.items?.get(pos)!!.changeFileState(FileStatus.Loading(0))
+            _viewChannel.postValue(viewState)
             val result = mainModel.downloadFile(state)
             when (result) {
-                is MyResult.Success -> viewState.items?.get(pos)!!.changeFileState(FileStatus.LOADED)
-                is MyResult.Error -> viewState.items?.get(pos)!!.changeFileState(FileStatus.ERROR)
+                is MyResult.Success -> {
+                    val liveData = result.data
+                    withContext(Dispatchers.Main) {
+                        liveData.observe(lifecycleOwner, Observer {
+                            if (it <= 99) {
+                                viewState.items?.get(pos)!!.changeFileState(FileStatus.Loading(it))
+                                _viewChannel.postValue(viewState)
+                            } else {
+                                viewState.items?.get(pos)!!.changeFileState(FileStatus.Loaded)
+                                _viewChannel.postValue(viewState)
+                            }
+                        })
+                    }
+                }
+                is MyResult.Error -> {
+                    viewState.items?.get(pos)!!.changeFileState(FileStatus.Error)
+                    _viewChannel.postValue(viewState)
+                }
             }
-            viewChannel.offer(viewState)
         }
     }
 }
