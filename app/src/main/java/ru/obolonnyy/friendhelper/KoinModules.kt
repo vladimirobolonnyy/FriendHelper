@@ -11,7 +11,7 @@ import ru.obolonnyy.friendhelper.network.ApiInteractorImpl
 import ru.obolonnyy.friendhelper.network.ElementsGenerator.initElements
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.CONTAINER
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
-import ru.obolonnyy.friendhelper.utils.data.StandI
+import ru.obolonnyy.friendhelper.api.Stand
 import ru.obolonnyy.friendhelper.utilsandroid.getAvailableDownloadsDir
 
 val appModule = module {
@@ -19,7 +19,7 @@ val appModule = module {
 }
 
 val mainModule = module {
-    single<List<StandI>> { initElements() }
+    single<List<Stand>> { initElements() }
     single { androidContext().getAvailableDownloadsDir() }
     single { MainModel(interactor = get(), downloadsDir = get()) }
     single(named(CONTAINER)) { (R.id.container) }

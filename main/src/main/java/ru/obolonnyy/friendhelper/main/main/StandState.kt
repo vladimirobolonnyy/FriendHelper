@@ -2,7 +2,7 @@ package ru.obolonnyy.friendhelper.main.main
 
 import android.view.View
 import ru.obolonnyy.friendhelper.main.R
-import ru.obolonnyy.friendhelper.utils.data.StandI
+import ru.obolonnyy.friendhelper.api.Stand
 
 sealed class FileStatus {
     object NotLoaded : FileStatus()
@@ -13,7 +13,7 @@ sealed class FileStatus {
 
 data class StandState(
     val position: Int,
-    val standI: StandI,
+    val stand: Stand,
     var version: String = "???",
     var versionProgressVisibility: Int = View.GONE,
 

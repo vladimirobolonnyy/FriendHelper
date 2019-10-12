@@ -15,7 +15,7 @@ import ru.obolonnyy.friendhelper.api.ApiInteractor
 import ru.obolonnyy.friendhelper.utils.constants.Constants
 import ru.obolonnyy.friendhelper.utils.constants.Constants.DATAPOWER
 import ru.obolonnyy.friendhelper.utils.data.MyResult
-import ru.obolonnyy.friendhelper.utils.data.StandI
+import ru.obolonnyy.friendhelper.api.Stand
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -35,7 +35,7 @@ class MainModel(
 
     private val getJustApkFileName = "friend.apk"
 
-    suspend fun getStandVersion(state: StandI): MyResult<String> {
+    suspend fun getStandVersion(state: Stand): MyResult<String> {
         return try {
             val version = interactor.getVersion(state)
             MyResult.Success(version)
@@ -45,7 +45,7 @@ class MainModel(
         }
     }
 
-    suspend fun getStandStatus(stand: StandI): MyResult<String> {
+    suspend fun getStandStatus(stand: Stand): MyResult<String> {
         return try {
             interactor.sendEmailTemporaryCode(stand)
             MyResult.Success(Constants.ONLINE)
@@ -65,7 +65,7 @@ class MainModel(
     fun downloadFile(state: StandState): MyResult<LiveData<Int>> {
         return try {
             val liveData = MutableLiveData<Int>()
-            val call: Call<ResponseBody> = interactor.downloadApk(state.standI)
+            val call: Call<ResponseBody> = interactor.downloadApk(state.stand)
             call.enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                     if (response.isSuccessful) {
@@ -146,6 +146,6 @@ class MainModel(
     }
 
     private fun getApkPath(state: StandState): String {
-        return "/friend/${state.standI.engName}/${state.version}/"
+        return "/friend/${state.stand.engName}/${state.version}/"
     }
 }

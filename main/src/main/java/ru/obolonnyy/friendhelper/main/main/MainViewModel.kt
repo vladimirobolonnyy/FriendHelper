@@ -12,9 +12,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
-import ru.obolonnyy.friendhelper.utils.data.StandI
+import ru.obolonnyy.friendhelper.api.Stand
 
-class MainViewModel(private val mainModel: MainModel, elements: List<StandI>) : ViewModel() {
+class MainViewModel(private val mainModel: MainModel, elements: List<Stand>) : ViewModel() {
 
     lateinit var lifecycleOwner: LifecycleOwner
 
@@ -50,7 +50,7 @@ class MainViewModel(private val mainModel: MainModel, elements: List<StandI>) : 
             viewState.items?.get(pos)!!.versionProgressVisibility = View.VISIBLE
             viewState.items?.get(pos)!!.version = ""
             _viewChannel.postValue(viewState)
-            val result = mainModel.getStandVersion(state.standI)
+            val result = mainModel.getStandVersion(state.stand)
             when (result) {
                 is MyResult.Success -> {
                     viewState.items?.get(pos)!!.version = result.data
@@ -74,7 +74,7 @@ class MainViewModel(private val mainModel: MainModel, elements: List<StandI>) : 
             viewState.items?.get(pos)!!.statusProgressVisibility = View.VISIBLE
             viewState.items?.get(pos)!!.status = ""
             _viewChannel.postValue(viewState)
-            val result = mainModel.getStandStatus(state.standI)
+            val result = mainModel.getStandStatus(state.stand)
             when (result) {
                 is MyResult.Success -> {
                     viewState.items?.get(pos)!!.status = result.data

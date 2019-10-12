@@ -4,7 +4,7 @@ def patch = 0
 def jenkinsVersion = System.getenv('JenkinsVersion') ?: 1000
 
 def appVersionCode = major * 1_000_000_000 + minor * 10_000_000 + patch * 100_000 + jenkinsVersion
-def appVersionName = major + "." + minor + "." + patch + "(" + jenkinsVersion + ")"
+def appVersionName = major + "." + minor + "." + patch + " (" + jenkinsVersion + ")"
 
 android {
     compileSdkVersion 28

@@ -28,7 +28,7 @@ class MainAdapter(
     }
 
     private fun bindViewHolder(holder: MainViewHolder, elem: StandState) = with(holder) {
-        name.text = elem.standI.stringName
+        name.text = elem.stand.stringName
 
         version.text = elem.version
         version.setOnClickListener { onVersionClicked(elem) }
