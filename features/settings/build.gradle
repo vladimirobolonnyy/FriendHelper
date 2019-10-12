@@ -2,12 +2,14 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply from: "../../deps.gradle"
 apply from: "../../android_commons.gradle"
+apply plugin: 'kotlin-android-extensions'
 
 android {
 }
 
 dependencies {
-
+    //ToDo remove somewhere
+    implementation project(":ServerApi") // for private links
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 
