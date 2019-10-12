@@ -1,7 +1,6 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import android.view.View
-import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.api.Stand
 
 sealed class FileStatus {

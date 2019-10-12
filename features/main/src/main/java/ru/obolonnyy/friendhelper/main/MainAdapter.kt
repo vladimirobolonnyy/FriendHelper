@@ -1,4 +1,4 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import android.view.LayoutInflater
 import android.view.View

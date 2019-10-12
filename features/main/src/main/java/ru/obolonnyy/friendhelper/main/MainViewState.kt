@@ -1,4 +1,4 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import java.io.File
 

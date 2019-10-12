@@ -29,7 +29,10 @@ dependencies {
     implementation project(":utils")
     implementation project(":utils-android")
     implementation project(":network")
+
+    //features
     implementation project(":main")
+    implementation project(":settings")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 

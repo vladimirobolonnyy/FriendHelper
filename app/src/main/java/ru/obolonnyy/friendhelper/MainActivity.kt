@@ -7,12 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 
 class MainActivity : AppCompatActivity() {
 
-//    val menuRouter: MenuRouter by inject()
-    val menuRouter: MenuRouterImpl = MenuRouterImpl(this.supportFragmentManager)
+    val menuRouter: MenuRouter by inject { parametersOf(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

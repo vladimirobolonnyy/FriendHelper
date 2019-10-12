@@ -1,4 +1,4 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import android.view.View
 import androidx.lifecycle.LifecycleOwner
@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.data.MyResult
 import ru.obolonnyy.friendhelper.api.Stand
 

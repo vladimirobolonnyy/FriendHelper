@@ -1,10 +1,9 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import ru.obolonnyy.friendhelper.main.R
 
 class MainViewHolder(root: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(root) {
     val name = root.findViewById<TextView>(R.id.name)!!

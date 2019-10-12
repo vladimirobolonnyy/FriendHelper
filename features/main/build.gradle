@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply from: "../deps.gradle"
-apply from: "../android_commons.gradle"
+apply from: "../../deps.gradle"
+apply from: "../../android_commons.gradle"
 
 android {
 }

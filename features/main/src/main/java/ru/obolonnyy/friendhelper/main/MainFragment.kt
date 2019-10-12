@@ -1,4 +1,4 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import android.content.Intent
 import android.net.Uri
@@ -18,8 +18,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.qualifier.named
-import ru.obolonnyy.friendhelper.main.BuildConfig
-import ru.obolonnyy.friendhelper.main.R
 import ru.obolonnyy.friendhelper.utils.constants.KoinConstants.PROVIDER
 import java.io.File
 

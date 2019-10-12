@@ -1,4 +1,4 @@
-package ru.obolonnyy.friendhelper.main.main
+package ru.obolonnyy.friendhelper.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
