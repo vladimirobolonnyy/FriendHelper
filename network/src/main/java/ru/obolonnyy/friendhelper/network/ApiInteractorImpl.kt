@@ -3,8 +3,8 @@ package ru.obolonnyy.friendhelper.network
 import okhttp3.ResponseBody
 import retrofit2.Call
 import ru.obolonnyy.friendhelper.api.ApiInteractor
-import ru.obolonnyy.friendhelper.network.RetrofitHelper.createRetrofits
 import ru.obolonnyy.friendhelper.api.Stand
+import ru.obolonnyy.friendhelper.network.RetrofitHelper.createRetrofits
 import ru.obolonnyy.priv.network.ServerApi
 
 class ApiInteractorImpl : ApiInteractor {
@@ -20,6 +20,6 @@ class ApiInteractorImpl : ApiInteractor {
     }
 
     override fun downloadApk(stand: Stand): Call<ResponseBody> {
-        return apis[stand]!!.downloadApk()
+        return apis[stand]!!.downloadApk(stand.app)
     }
 }
