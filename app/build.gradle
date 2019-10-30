@@ -21,6 +21,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "friendhelper.apk"
+        }
+    }
 }
 
 dependencies {
@@ -29,7 +35,10 @@ dependencies {
     implementation project(":utils")
     implementation project(":utils-android")
     implementation project(":network")
+
+    //features
     implementation project(":main")
+    implementation project(":settings")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
 
@@ -50,6 +59,6 @@ dependencies {
     implementation "org.koin:koin-android:$versions.koin"
 //    implementation "org.koin:koin-android-scope:$versions.koin"
     implementation "org.koin:koin-android-viewmodel:$versions.koin"
-
+    implementation "com.google.android.material:material:$versions.material"
 
 }

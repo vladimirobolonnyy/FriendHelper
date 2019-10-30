@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">settings</string>
+    <string name="qr_code_text">Ссылка на приложение Friend Helper</string>
+    <string name="link_copied">Ссылка скопирована в буфер обмена</string>
+</resources>

@@ -1,0 +1,40 @@
+name: Release alpha
+
+on:
+  push:
+    branches:
+      - alpha_release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+        name: Checkout
+        with:
+          #        ref: develop
+          token: ${{ secrets.MY_TOKEN }}
+          submodules: true
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Pass Environment variables
+        run: echo Build number is $BUILD_NUMBER
+
+#      - name: Unit Test
+#        run: ./gradlew testDebugUnitTest
+#        continue-on-error: true # Allow steps to continue even with test failures
+
+      #    - name: Report
+      #       uses: asadmansr/android-test-report-action@master
+
+      - name: Build
+        run: ./gradlew assembleDebug
+
+      - name: Archive apk
+        uses: actions/upload-artifact@v1
+        with:
+          name: friendhelper
+          path: app/build/outputs/apk/debug/friendhelper.apk

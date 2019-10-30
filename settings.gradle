@@ -1,7 +1,12 @@
-include ':app',
-        ':api',
-        ':utils',
-        ':utils-android',
-        ':network',
-        ':ServerApi',
-        ':main'
+include ':app'
+include ':api'
+include ':utils'
+include ':utils-android'
+include ':network'
+include ':ServerApi'
+
+include ':main'
+project(':main').projectDir = new File(rootDir, 'features/main')
+
+include ':settings'
+project(':settings').projectDir = new File(rootDir, 'features/settings')

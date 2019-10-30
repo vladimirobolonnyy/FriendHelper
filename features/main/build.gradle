@@ -1,0 +1,37 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: "../../deps.gradle"
+apply from: "../../android_commons.gradle"
+
+android {
+}
+
+dependencies {
+
+    implementation project(":api")
+    implementation project(":utils")
+    implementation project(":utils-android")
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
+
+    implementation "androidx.appcompat:appcompat:$versions.appcompat"
+    implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
+
+    implementation "androidx.recyclerview:recyclerview:$versions.recyclerview"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swiperefreshlayout"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines"
+
+    implementation "androidx.multidex:multidex:$versions.multidex"
+
+    implementation "com.jakewharton.timber:timber:$versions.timber"
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
+
+    implementation "org.koin:koin-android:$versions.koin"
+//    implementation "org.koin:koin-android-scope:$versions.koin"
+    implementation "org.koin:koin-android-viewmodel:$versions.koin"
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.arch}"
+    implementation "androidx.lifecycle:lifecycle-extensions:${versions.arch}"
+}

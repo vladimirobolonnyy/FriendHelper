@@ -5,8 +5,8 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import ru.obolonnyy.friendhelper.api.Stand
 import ru.obolonnyy.friendhelper.network.ElementsGenerator.initElements
-import ru.obolonnyy.friendhelper.utils.data.StandI
 import ru.obolonnyy.priv.network.ServerApi
 import timber.log.Timber
 import java.security.NoSuchAlgorithmException
@@ -23,7 +23,7 @@ object RetrofitHelper {
     /*
     * Be aware, when HttpLoggingInterceptor.Level.BODY, Retrofit streaming doesn't works.
     * */
-    private val loggingLevel = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS else HttpLoggingInterceptor.Level.NONE
+    private val loggingLevel = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
 
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
@@ -35,16 +35,16 @@ object RetrofitHelper {
             .build()
     }
 
-    fun createRetrofits(): Map<StandI, ServerApi> {
+    fun createRetrofits(): Map<Stand, ServerApi> {
         val result = initElements()
-        return hashMapOf<StandI, ServerApi>().apply {
+        return hashMapOf<Stand, ServerApi>().apply {
             result.forEach {
                 this[it] = createRetrofit(it)
             }
         }
     }
 
-    private fun createRetrofit(stand: StandI): ServerApi {
+    private fun createRetrofit(stand: Stand): ServerApi {
         return Retrofit.Builder()
             .baseUrl(stand.url)
             .addConverterFactory(MoshiConverterFactory.create())

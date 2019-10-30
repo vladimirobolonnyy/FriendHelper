@@ -1,4 +1,4 @@
 [submodule "ServerApi"]
 	path = ServerApi
-	url = https://github.com/vladimirobolonnyy/ServerApi
+	url = https://github.com/vladimirobolonnyy/ServerApi.git
 	branch = master

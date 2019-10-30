@@ -6,30 +6,41 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import ru.obolonnyy.friendhelper.main.main.MainFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
 class MainActivity : AppCompatActivity() {
+
+    val menuRouter: MenuRouter by inject { parametersOf(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
+        initMenu()
 
         if (savedInstanceState == null) {
-            startMainFragment()
+            menuRouter.navigateToMain()
         }
         askPermissions()
     }
 
-    private fun startMainFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance())
-            .commitNow()
+    private var current: Int? = null
+    private fun initMenu() {
+        val bottomNavigationBar = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationBar.setOnNavigationItemSelectedListener { selectedItem ->
+            if (selectedItem.itemId == current) return@setOnNavigationItemSelectedListener true
+            when (selectedItem.itemId) {
+                R.id.main -> menuRouter.navigateToMain()
+                R.id.settings -> menuRouter.navigateToSettings()
+                R.id.share -> menuRouter.navigateToShare()
+                else -> return@setOnNavigationItemSelectedListener true
+            }
+            current = selectedItem.itemId
+            true
+        }
     }
 
     private fun askPermissions(): Boolean {
