@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - dev_work
+
+jobs:
+  build:
+    # ubuntu-latest, ubuntu-18.04, or ubuntu-16.04
+    # windows-latest, windows-2019, or windows-2016
+    # macOS-latest or macOS-10.14
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+        name: Checkout
+        with:
+          #        ref: develop
+          token: ${{ secrets.MY_TOKEN }}
+          submodules: true
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+#      - name: Unit Test
+#        run: ./gradlew testDebugUnitTest
+#        continue-on-error: true # Allow steps to continue even with test failures
+
+      #    - name: Report
+      #       uses: asadmansr/android-test-report-action@master
+
+      - name: Build
+        run: ./gradlew assembleDebug
+
+#      - uses: actions/checkout@master
+#
+#      - uses: actions/download-artifact@master
+#        with:
+#          name: app-debug.apk
+#          path: path/to/artifact
+#
+#      - run: cat build/outputs/apk/debug/app-debug.apk
+
+      - name: Archive apk
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+#     - name: Run a one-line script
+#       run: echo Hello, world!
+#     - name: Run a multi-line script
+#       run: |
+#         echo Add other actions to build,
+#         echo test, and deploy your project.
+
