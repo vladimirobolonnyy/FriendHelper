@@ -1,7 +1,7 @@
 def major = 0
 def minor = 3
 def patch = 1
-def jenkinsVersion = System.getenv('JenkinsVersion') ?: 1000
+def jenkinsVersion = System.getenv('BUILD_NUMBER') ?: 1000
 
 def appVersionCode = major * 1_000_000_000 + minor * 10_000_000 + patch * 100_000 + jenkinsVersion
 def appVersionName = major + "." + minor + "." + patch + " (" + jenkinsVersion + ")"
