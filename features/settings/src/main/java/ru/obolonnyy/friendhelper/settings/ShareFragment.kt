@@ -31,7 +31,7 @@ class ShareFragment : Fragment() {
         linkTextView = view.findViewById(R.id.link)
 
         view.findViewById<TextView>(R.id.version).apply {
-            text = "Версия: " + BuildConfig.APP_VERSION
+            text = "Версия: " + BuildConfig.VERSION_NAME
         }
 
         view.setOnClickListener {

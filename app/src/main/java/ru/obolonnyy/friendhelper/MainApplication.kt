@@ -10,10 +10,14 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         startKoin {
-            printLogger()
+            if (BuildInfo.isDebug) {
+                printLogger()
+            }
             androidContext(this@MainApplication)
             modules(koinModules)
         }
-        Timber.plant(Timber.DebugTree())
+        if (BuildInfo.isDebug) {
+            Timber.plant(Timber.DebugTree())
+        }
     }
 }

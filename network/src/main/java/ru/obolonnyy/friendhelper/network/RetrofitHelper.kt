@@ -23,7 +23,12 @@ object RetrofitHelper {
     /*
     * Be aware, when HttpLoggingInterceptor.Level.BODY, Retrofit streaming doesn't works.
     * */
-    private val loggingLevel = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+    private val loggingLevel = when (BuildConfig.BUILD_TYPE) {
+        "debug" -> HttpLoggingInterceptor.Level.BODY
+        "alphaRelease" -> HttpLoggingInterceptor.Level.NONE
+        "release" -> HttpLoggingInterceptor.Level.NONE
+        else -> HttpLoggingInterceptor.Level.NONE
+    }
 
     private val okHttpClient by lazy {
         OkHttpClient.Builder()

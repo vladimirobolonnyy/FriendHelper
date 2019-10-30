@@ -31,10 +31,10 @@ jobs:
       #       uses: asadmansr/android-test-report-action@master
 
       - name: Build
-        run: ./gradlew assembleDebug
+        run: ./gradlew :app:assembleAlphaRelease
 
       - name: Archive apk
         uses: actions/upload-artifact@v1
         with:
           name: friendhelper
-          path: app/build/outputs/apk/debug/friendhelper.apk
+          path: app/build/outputs/apk/alphaRelease/friendhelper.apk
