@@ -23,9 +23,8 @@ jobs:
       - name: Pass Environment variables
         run: echo Build number is $BUILD_NUMBER
 
-#      - name: Unit Test
-#        run: ./gradlew testDebugUnitTest
-#        continue-on-error: true # Allow steps to continue even with test failures
+      - name: Unit Test
+        run: ./gradlew testAlphaReleaseUnitTest
 
       #    - name: Report
       #       uses: asadmansr/android-test-report-action@master
