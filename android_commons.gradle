@@ -1,10 +1,19 @@
+import java.text.SimpleDateFormat
+
 def major = 0
 def minor = 3
-def patch = 1
+def patch = 2
 def jenkinsVersion = System.getenv('BUILD_NUMBER') ?: 1000
 
-def appVersionCode = major * 1_000_000_000 + minor * 10_000_000 + patch * 100_000 + jenkinsVersion
+static def currentDate() {
+    def date = new Date()
+    def sdf = new SimpleDateFormat("dd.MM.yyyy")
+    return sdf.format(date)
+}
+
+def appVersionCode = major * 100_000_000 + minor * 1_000_000 + patch * 10_000 + jenkinsVersion
 def appVersionName = major + "." + minor + "." + patch + " (" + jenkinsVersion + ")"
+def appDateVersionName = major + "." + minor + "." + patch + " (" + currentDate() + ")"
 
 android {
     compileSdkVersion 28
@@ -14,12 +23,25 @@ android {
         versionCode appVersionCode
         versionName appVersionName
         resConfigs "en"
-        buildConfigField "String", "APP_VERSION", "\"$appVersionName\""
+        buildConfigField "String", "APP_DATE_VERSION", "\"$appDateVersionName\""
+    }
 
+    buildTypes {
+        alphaRelease {
+            initWith release
+        }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        checkAllWarnings true
+        warningsAsErrors true
+//        disable 'MissingTranslation', ...
+        //OR this line to check but not worry about result (i think this is what you want)
+//        ignore 'MissingTranslation', ...
     }
 }

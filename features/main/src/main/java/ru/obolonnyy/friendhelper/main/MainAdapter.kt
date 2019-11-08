@@ -41,10 +41,15 @@ class MainAdapter(
         status.isClickable = elem.statusProgressVisibility == View.GONE
         statusProgress.visibility = elem.statusProgressVisibility
 
-        file.visibility = elem.fileVisibility
-        file.setImageResource(elem.fileImageResource)
-        file.setOnClickListener { onFileClicked(elem) }
-        file.isClickable = elem.fileIsClickable
+        //hardcoded, but..
+        if (elem.stand.engName.toLowerCase() != "dev"){
+            file.visibility = elem.fileVisibility
+            file.setImageResource(elem.fileImageResource)
+            file.setOnClickListener { onFileClicked(elem) }
+            file.isClickable = elem.fileIsClickable
+        } else {
+            file.visibility = View.GONE
+        }
 
         downloadProgress.text = if (elem.downloadProgress == null) "" else "${elem.downloadProgress}"
     }

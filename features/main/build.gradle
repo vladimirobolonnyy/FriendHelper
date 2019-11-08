@@ -34,4 +34,6 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.arch}"
     implementation "androidx.lifecycle:lifecycle-extensions:${versions.arch}"
+
+    implementation "com.google.truth:truth:${versions.truth}"
 }

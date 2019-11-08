@@ -53,7 +53,7 @@ class MainFragment : Fragment() {
         recycler.adapter = adapter
         swipe = view.findViewById(R.id.swiper)
         swipe.setOnRefreshListener { refreshItems() }
-        view.findViewById<TextView>(R.id.version).text = "Version: ${BuildConfig.APP_VERSION}"
+        view.findViewById<TextView>(R.id.version).text = "Version: ${BuildConfig.APP_DATE_VERSION}"
 
     }
 
