@@ -1,6 +1,5 @@
 package ru.obolonnyy.friendhelper.settings
 
-import android.content.ClipData
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,7 +30,7 @@ class ShareFragment : Fragment() {
         linkTextView = view.findViewById(R.id.link)
 
         view.findViewById<TextView>(R.id.version).apply {
-            text = "Версия: " + BuildConfig.VERSION_NAME
+            text = "Версия: " + BuildConfig.APP_DATE_VERSION
         }
 
         view.setOnClickListener {
