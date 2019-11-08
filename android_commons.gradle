@@ -24,6 +24,7 @@ android {
         versionName appVersionName
         resConfigs "en"
         buildConfigField "String", "APP_DATE_VERSION", "\"$appDateVersionName\""
+    }
 
     buildTypes {
         alphaRelease {
@@ -34,5 +35,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        checkAllWarnings true
+        warningsAsErrors true
+//        disable 'MissingTranslation', ...
+        //OR this line to check but not worry about result (i think this is what you want)
+//        ignore 'MissingTranslation', ...
     }
 }
